@@ -6,7 +6,7 @@ It won't necesarily be the source of the lastest version of each script (they te
 This is really a hack, not a script per say, it gives you 7 sliders for controlling camera position, rotation, fov and distance from point of interest, and resets them to middle position as soon as you move them. The difference is forwarded to transform of the camera. This enables very simple fuss-free positioning of a camera (Framing) without using brutal methods like Transform inspector, or moving it manually in scene view.
 The point is - this is not runtime, this is editor time, but without a slightest reference to UnityEditor, scriptableObjects etc. It doesn't even need to [ExecuteInEditMode]
 
-![Alt text](/blob/master/Screenshots/cameraInspector.png?raw=true?raw=true "Screenshot")
+![Alt text](/Screenshots/cameraInspector.png?raw=true?raw=true "Screenshot")
 # zCameraController.cs
 still work in progress (no map edge detection/ wall detection) but a pretty functional stab at a camera controller script
 
