@@ -2,7 +2,15 @@
 a random collection of snippets I use for various projects. This repository is mainly hosting this file, readme, with description of each script.
 It won't necesarily be the source of the lastest version of each script (they tend to get updated as need arises in anotether parts of the zUtils codebase
 
-#TimeRamp.cs
+# zCameraInspectorHelper.cs
+This is really a hack, not a script per say, it gives you 7 sliders for controlling camera position, rotation, fov and distance from point of interest, and resets them to middle position as soon as you move them. The difference is forwarded to transform of the camera. This enables very simple fuss-free positioning of a camera (Framing) without using brutal methods like Transform inspector, or moving it manually in scene view.
+The point is - this is not runtime, this is editor time, but without a slightest reference to UnityEditor, scriptableObjects etc. It doesn't even need to [ExecuteInEditMode]
+
+![Alt text](/blob/master/Screenshots/cameraInspector.png?raw=true?raw=true "Screenshot")
+# zCameraController.cs
+still work in progress (no map edge detection/ wall detection) but a pretty functional stab at a camera controller script
+
+# TimeRamp.cs
 
 TimeRamp is an simplistic animation utility I wrote a while ago and somehow end up using it pretty much everywhere.
 Its basically a struct that holds a Time.time when an event was triggered, and a desired duration. It provides a timeramp.value getter which gives you normalized values in the 0-1 range, and a timeramp.isRunning bool which is false if last ramp played through (reaching 0 or 1) and true if the value is still chaning.
@@ -25,7 +33,7 @@ There are several helper methosd available like GoOneIn(float seconds), or JumpZ
 
 
 
-#zDragResizeRect.cs
+# zDragResizeRect.cs
 
 UI utility that adds a panel on the selected side of the parent rect, and listens for drag events. When dragged, it resizes the panel with a typical 'windows' logic, with anchroing and pivoting based on where the user clicked.
 A Bit more sophisticated class, able to control an array of dragResizables, zDraggable, has its own respository
@@ -54,16 +62,16 @@ Heres a video demo
   
 Could probably use a bit more null conditions checking. 
 
-#zRectExtensions
+# zRectExtensions
 
 A few extension methods for RectTransform I was missing for a long time. Enables simple setting the piviot (as Vector2 - like you would with normal RectTransform) but also 
 seperately for horizontal and vertical i.e. rect.setPivotX(0) setAnchorY(1) with a super sweet addition of not messing up currrent positioning (most of the time), so it behaves a bit like Inspector in the Editor
 
-#zScrollRect.cs
+# zScrollRect.cs
 
 Inheriting from Unity ScrollRect it disables the drag behaviour (I hate it), finds its own slider, and has some minor improvements
 
-#BenchmarkClones.cs
+# BenchmarkClones.cs
 
 Clone a gameobject n times, wait for k frames and display FPS. super simple
 
@@ -71,28 +79,22 @@ Clone a gameobject n times, wait for k frames and display FPS. super simple
 
 Rotates stuff with constant motion.
 
-#zNode and zNodeController.cs
+# zNode and zNodeController.cs
 
 I noticed that for a lot of project I am instancing UI objects from templates, that end up in a horizontalLayoutGroup. This is just an attempt to limit boilerplate each time I am doing this. 
 It provides basic templating functionality - it tries to populate a list of templates based on objects that inherit from zNode in its children, creates a dictionary of them, handles instancing, parenting, and few other misc things.
 
-#zResourceLoader.cs
-static classes to load resources that I use for other scripts, like cursors
-
-#zCameraController.cs
-still work in progress (no map edge detection/ wall detection) but a pretty functional stab at a camera controller script
-
-#zAnimateLayout.cs
+# zAnimateLayout.cs
 work in progress - uses TimeRamp to animate UI properties
 
 #zHoverColorProvider.cs
 Got tired of scripting color picking logic for UI elements. IColorProvider is an interface providing four basic colours (neutral, hovered, active, disabled), and a callback Action when neutral is changed (via OnValidate) to enable live preview.
 The idea is that child objects can look for any MonoBehaviour implementing IColorProvier and 'synchronize' their colors
 
-#zCameraInspectorHelper.cs
-This is really a hack, not a script per say, it gives you 7 sliders for controlling camera position, rotation, fov and distance from point of interest, and resets them to middle position as soon as you move them. The difference is forwarded to transform of the camera. This enables very simple fuss-free positioning of a camera (Framing) without using brutal methods like Transform inspector, or moving it manually in scene view.
-The point is - this is not runtime, this is editor time, but without a slightest reference to UnityEditor, scriptableObjects etc. It doesn't even need to [ExecuteInEditMode]
 
+
+# zResourceLoader.cs
+static classes to load resources that I use for other scripts, like cursors
 
 
 
