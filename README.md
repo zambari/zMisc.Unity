@@ -1,4 +1,5 @@
-# zMisc.Unity (miscellaneous script collection and their decrtiptions)
+# zMisc.Unity 
+### (miscellaneous script collection and their decrtiptions)
 a random collection of snippets I use for various projects. This repository is mainly hosting this file, readme, with description of each script.
 It won't necesarily be the source of the lastest version of each script (they tend to get updated as need arises in anotether parts of the zUtils codebase
 
