@@ -1,7 +1,7 @@
 # zMisc.Unity 
 ### (miscellaneous script collection and their decrtiptions)
-a random collection of snippets I use for various projects. This repository is mainly hosting this file, readme, with description of each script.
-It won't necesarily be the source of the lastest version of each script (they tend to get updated as need arises in anotether parts of the zUtils codebase
+This repository is a random collection of snippets I use for various projects. This repository is mainly hosting the document you are reading right now, in case some one ever finds a file of unknown purpose and tracks is back here - where descriptions of each script are provided.
+Note that it won't necesarily be the source of the lastest version of each script (they tend to get updated as need arises in anotether parts of the zUtils codebase
 
 # zCameraInspectorHelper.cs
 This is really a hack, not a script per say, it gives you 7 sliders for controlling camera position, rotation, fov and distance from point of interest, and resets them to middle position as soon as you move them. The difference is forwarded to transform of the camera. This enables very simple fuss-free positioning of a camera (Framing) without using brutal methods like Transform inspector, or moving it manually in scene view.
