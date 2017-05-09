@@ -9,7 +9,7 @@ The point is - this is not runtime, this is editor time, but without a slightest
 
 ![Alt text](/Screenshots/cameraInspector.png?raw=true?raw=true "Screenshot")
 # zCameraController.cs
-still work in progress (no map edge detection/ wall detection) but a pretty functional stab at a camera controller script
+still work in progress (no map edge detection/ wall detection) but a pretty functional stab at a camera controller script, with middle mouse button movement, scroll movement, rotation around a pivot in front of you.
 
 # TimeRamp.cs
 
