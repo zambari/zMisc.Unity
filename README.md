@@ -81,10 +81,6 @@ Inheriting from Unity ScrollRect it disables the drag behaviour (I hate it), fin
 
 Clone a gameobject n times, wait for k frames and display FPS. super simple
 
-#SimpleRotate.cs
-
-Rotates stuff with constant motion.
-
 # zNode and zNodeController.cs
 
 I noticed that for a lot of project I am instancing UI objects from templates, that end up in a horizontalLayoutGroup. This is just an attempt to limit boilerplate each time I am doing this. 
@@ -93,11 +89,14 @@ It provides basic templating functionality - it tries to populate a list of temp
 # zAnimateLayout.cs
 work in progress - uses TimeRamp to animate UI properties
 
-#zHoverColorProvider.cs
+# zHoverColorProvider.cs
 Got tired of scripting color picking logic for UI elements. IColorProvider is an interface providing four basic colours (neutral, hovered, active, disabled), and a callback Action when neutral is changed (via OnValidate) to enable live preview.
 The idea is that child objects can look for any MonoBehaviour implementing IColorProvier and 'synchronize' their colors
 
 
+# SimpleRotate.cs
+
+Rotates stuff with constant motion. The HelloWorld script of unity but I wrote it one too many times, its on github now
 
 # zResourceLoader.cs
 static classes to load resources that I use for other scripts, like cursors
