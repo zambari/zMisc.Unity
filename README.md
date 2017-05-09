@@ -1,4 +1,4 @@
-# zMisc.Unity
+# zMisc.Unity (miscellaneous script collection and their decrtiptions)
 a random collection of snippets I use for various projects. This repository is mainly hosting this file, readme, with description of each script.
 It won't necesarily be the source of the lastest version of each script (they tend to get updated as need arises in anotether parts of the zUtils codebase
 
@@ -32,11 +32,16 @@ There are several helper methosd available like GoOneIn(float seconds), or JumpZ
 
 
 
-
 # zDragResizeRect.cs
 
 UI utility that adds a panel on the selected side of the parent rect, and listens for drag events. When dragged, it resizes the panel with a typical 'windows' logic, with anchroing and pivoting based on where the user clicked.
 A Bit more sophisticated class, able to control an array of dragResizables, zDraggable, has its own respository
+
+Handles matching the pivots, makes sure the image is there, adds layoutelement with ignore layout just in case, checks if IColorProvider is available in parent, if targetRect is null it takes its parent rect etc
+
+![Alt text](/Screenshots/dragResize.png?raw=true?raw=true "Screenshot")
+
+
 
 # zKeyMap
 Super tiny keyboard mapping utility - avoids checking for Input.GetKeyDown in Update, your mono will recieve a call when it happens
@@ -58,7 +63,7 @@ instead of the recommended method
     
 Heres a video demo
     
-[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/eSrLbbu6xas/0.jpg)](http://www.youtube.com/watch?v=eSrLbbu6xas)
+[![](http://img.youtube.com/vi/eSrLbbu6xas/0.jpg)](http://www.youtube.com/watch?v=eSrLbbu6xas)
   
 Could probably use a bit more null conditions checking. 
 
