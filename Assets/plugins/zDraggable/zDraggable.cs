@@ -137,7 +137,7 @@ public void colorsChanged()
 
         if (menuController == null) menuController = GetComponentInChildren<zDraggableMenuController>();
         if (menuController != null) menuController.setHeight(headerHeight);
-if (colors!=null&& colors.OnChange!=null)
+if (colors!=null)
         colors.OnChange.Invoke();
     }
 
