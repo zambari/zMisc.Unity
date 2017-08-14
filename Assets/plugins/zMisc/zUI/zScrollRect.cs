@@ -5,22 +5,19 @@ using UnityEngine;
 
 public class zScrollRect : ScrollRect, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
-public bool enableDragging;
+    public bool enableDragging;
    new void OnValidate()
     {
     //  base.OnValidate();
 		 checkReferecnes();
-		// if (enableScroll)
-
     }
-    [HideInInspector]
-    public bool reversedScroll; //not implemented
+    //[HideInInspector]
+    //public bool reversedScroll; //not implemented
 	public bool reverseMouseScroll;
     public override void OnBeginDrag(PointerEventData eventData) {if (enableDragging) base.OnBeginDrag(eventData); }
     public override void OnDrag(PointerEventData eventData) {if (enableDragging) base.OnDrag(eventData); }
     public override void OnEndDrag(PointerEventData eventData) {if (enableDragging) base.OnEndDrag(eventData); }
 	bool enableScroll;
-
 	protected override void OnEnable()
 	{
 		base.OnEnable();
@@ -58,7 +55,6 @@ public bool enableDragging;
         enableScroll = false;
     }
 
-	
     protected virtual void Update()
     {
         if (enableScroll)

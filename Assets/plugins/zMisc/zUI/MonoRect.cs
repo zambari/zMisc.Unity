@@ -1,7 +1,7 @@
 
 using UnityEngine;
 using UnityEngine.UI;
-
+///Z
 public class MonoRect : MonoBehaviour
 {  
      Text _text;

@@ -31,7 +31,8 @@ public class TimelineEventBlock
     #endregion
 }
 
-[ExecuteInEditMode]
+
+ // [  ExecuteInEditMode]
 public class Timeline : MonoBehaviour
 {
 
@@ -51,9 +52,9 @@ public class Timeline : MonoBehaviour
     public bool reverse;
 
     [Range(0, 1)]
-    public double _timeRelativeToLoopWindow;
+    public double _timeRelativeToLoopWindow=1;
     [Range(0, 1)]
-    public double _timeRelativeToDuration;
+    public double _timeRelativeToDuration=1;
 
     public bool startOnPlay;
 
@@ -93,7 +94,7 @@ public class Timeline : MonoBehaviour
     float _unitPixelSize = 200;
 
     //float _unitPixelSize 
-    public float durationSet;
+    public float durationSet=90;
     [Header("Events")]
     public FloatEvent timeChanged;
     public TimelineEventBlock events;
@@ -198,7 +199,7 @@ public class Timeline : MonoBehaviour
             //if (_speed == value) return;
             _speed = value;
             speedSet = value;
-            if (_speed == 1 && Application.isPlaying) isPlaying = true;
+            if (_speed == 1 && Application.isPlaying && Time.time>0.1f) isPlaying = true;
             //   sendChangeEvents();
         }
     }
@@ -394,6 +395,7 @@ public class Timeline : MonoBehaviour
         get { return _duration; }
         set
         {
+            Debug.Log("set duration "+value);
             if (value <= 0) value = 1;
             if (_duration == value) return;
 
@@ -525,19 +527,20 @@ public class Timeline : MonoBehaviour
     }
      public void Play()
      {
-         Debug.Log("pp");
-         if (isPlaying)
+        Debug.Log("pp");
+        /* if (isPlaying)
          {
              time = inPointScaled;
              isPlaying = false;
 
          }
          else
-         {
+         {*/
+             time = inPointScaled;
              isPlaying = true;
 
 
-         }
+        
      }
 
     public void Stop()
@@ -545,7 +548,8 @@ public class Timeline : MonoBehaviour
         if (isPlaying)
         {
             isPlaying = false;
-            time = inPointScaled;
+            //time = inPointScaled;
+            time = 0;
         }
         // else
         //   Play();
@@ -668,6 +672,8 @@ public class Timeline : MonoBehaviour
         // return;
 
         isPlaying = _isPlayingset;
+        if (durationSet<=0) durationSet=1;
+        if (unitPixelSize<=0) unitPixelSize=100;
 
         if (!Application.isPlaying) isPlaying = false;
 
@@ -675,7 +681,7 @@ public class Timeline : MonoBehaviour
 
 
         //.  if (main == null) main = this;
-        //  speed = speedSet;
+         speed = speedSet;
         duration = durationSet;
         inPoint = inPointSet;
         loop = _loop;
@@ -756,8 +762,22 @@ public class Timeline : MonoBehaviour
         isPlaying = startOnPlay;
         if (isPlaying) time = inPointScaled;
         OnValidate();
+        time = 0;
       //  sendChangeEvents();
        sendAllEvents();
     }
+
+
+    
+void OnDisable()
+{
+    time=0;
+}
+
+void OnDestroy()
+{
+    time=0;
+}
+
     #endregion
 }

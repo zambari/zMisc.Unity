@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+﻿//v0.1
+using UnityEngine;
+
 public class MoveRel : MonoRect
 {
     [Header("MoveRel will set positon relative to parent")]
     [Header("1 = same as parent")]
-    public bool previewnPositionX = false;
+    public bool previewnPositionX = true;
     public bool previewnPositionY = false;
     public bool previewSizeX = false;
     public bool previewSizeY = false;
@@ -16,6 +18,14 @@ public class MoveRel : MonoRect
     [Header("Use public set methods in runtime")]
     [ReadOnly]
     public int recievedEventCount;
+    void Reset()
+    {
+        parentRect.pivot=Vector2.zero;
+        //rect.anchorMin=Vector2.zero;
+        rect.pivot=Vector2.zero;
+     //   rect.anchorMax=Vector2.zero;
+    }
+
     void Start()
     {
         previewnPositionX = false;
@@ -26,7 +36,7 @@ public class MoveRel : MonoRect
     }
     protected  void OnValidate()
     {
-
+        if (!isActiveAndEnabled) return;
         if (setAnchors)
             rect.setAnchorsX(0, 0);
 

@@ -2,6 +2,7 @@
 	Author: Jon Kenkel (nonathaj)
 	Created: 1/23/2016
 */
+#if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
 using System;
@@ -166,3 +167,4 @@ public class AssetDefineManager : AssetPostprocessor
 		}
 	}
 }
+#endif

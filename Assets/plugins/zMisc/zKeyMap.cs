@@ -39,35 +39,40 @@ public class zKeyMap : MonoBehaviour
         onDownList = new List<Action>();
     }
     public static bool map(MonoBehaviour mono, KeyCode key, Action actionOnDown, Action actionOnUp = null)
-    {
+    {  
+        bool ret=true;
         if (k == null)
         {
             createLists();
         }
         if (k.Contains(key))
         {
-            Debug.Log("key " + key.ToString() + "is  mapped already, sorry");
-            return false;
+            Debug.LogWarning("key " + key.ToString() + " is  mapped more than once "+mono.name,mono);
+           ret= false;
         }
         k.Add(key);
         m.Add(mono);
         onDownList.Add(actionOnDown);
         onUpList.Add(actionOnUp);
-        return true;
+        return ret;
     }
 
-    /// Depreciated
-
-    public static bool map(MonoBehaviour mono, Action actionOnDown, KeyCode key)
+    /// <summary>.
+    /// Depreciated, use  map(MonoBehaviour mono, KeyCode key, Action actionOnDown)
+    /// </summary>
+/*    public static bool map(MonoBehaviour mono, Action actionOnDown, KeyCode key)
     {
-        return map(mono, actionOnDown, key);
-    }
+        Debug.Log("depreciated method call by "+mono.name,mono);
+        return false;
+    //    return map(mono, actionOnDown, key);
+    }*/
 
-    public static bool map(MonoBehaviour mono, KeyCode key, Action actionOnDown)
+///
+/* 
+    public static bool map(MonoBehaviour mono, , Action actionOnDown)
     {
-        return map(mono, actionOnDown, key);
-    }
-
+      return map(mono, actionOnDown, key);
+    }*/
 
 
     void Update()

@@ -50,9 +50,9 @@ public class TagHider : MonoBehaviour
                 {
 
                     objects[i].SetActive(!objects[i].activeInHierarchy);
-                    zLog.Log("state of " + objects[i] + "toggled");
+                    Debug.Log("state of " + objects[i] + "toggled");
                 }
-                else zLog.Log("no object wit tag " + tags[i]);
+                else Debug.Log("no object wit tag " + tags[i]);
 
             }
     }

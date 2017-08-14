@@ -32,7 +32,7 @@ public class SimpleConsole : MonoRect
 
         if (instance == null)
         {
-            Debug.LogWarning(" simple log not present !");
+//            Debug.LogWarning(" simple log not present !");
         }
         else
         {
@@ -46,6 +46,16 @@ public class SimpleConsole : MonoRect
         }
     }
 
+ public void log(string logentry)
+    {if (logList==null) return;
+            if (logList.Count >= maxLines) logList.RemoveAt(0);
+            logList.Add(logentry);
+            buildLog();
+            if (alsoLogToConsole) Debug.Log(logentry);
+            if (autoHideLines)
+                StartCoroutine(Remover());
+
+    }
 
     IEnumerator Remover()
     {
@@ -69,9 +79,10 @@ public class SimpleConsole : MonoRect
     }
     void Awake()
     {
-        if (instance != null) { Debug.LogWarning("another SimplEonsole :" + instance.name + " we are " + name, gameObject); }
+        if (instance != null) { Debug.LogWarning("another SimplEonsole : other object " + instance.name + " this object we are " + name, gameObject); }
         instance = this;
         logList = new List<string>();
+        Clear();
     }
 
 

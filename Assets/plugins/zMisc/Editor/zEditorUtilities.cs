@@ -6,7 +6,9 @@ using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
 
-public static class ImageEditorUtilities
+// changelist
+// v.030 image->rawimage added
+public static class zEditorUtilities
 {
     const string uiTag = "UI";
     [MenuItem("GameObject/UI/UI Subobjects/Add 'UI' tag to subobjects")]
@@ -46,29 +48,88 @@ public static class ImageEditorUtilities
     [MenuItem("GameObject/UI/UI Subobjects/Select/All Children  Handles")]
     public static void SelHandles()
     {
-        
-      Selection.objects=Selection.gameObjects.getAllChildrenCalled("Handle");
+
+        Selection.objects = Selection.gameObjects.getAllChildrenCalled("Handle");
 
     }
-    
+
     [MenuItem("GameObject/UI/UI Subobjects/Select/All Children  Backgounrd")]
     public static void SelBackgrounds()
     {
-        
-      Selection.objects=Selection.gameObjects.getAllChildrenCalled("Background");
+
+        Selection.objects = Selection.gameObjects.getAllChildrenCalled("Background");
 
     }
-    
-     
+
+
     [MenuItem("GameObject/UI/UI Subobjects/Select/All Children  Fills")]
     public static void SelFills()
     {
-        
-      Selection.objects=Selection.gameObjects.getAllChildrenCalled("Fill");
+
+        Selection.objects = Selection.gameObjects.getAllChildrenCalled("Fill");
 
     }
- 
- 
+    [MenuItem("Tools/selection/select objects called the same one level up")]
+
+    public static void selectObjectsNamedTheSame1()
+    {
+        selectObjectsNamedTheSame(1);
+    }
+
+
+    [MenuItem("Tools/selection/select objects called the same two levels up")]
+
+    public static void selectObjectsNamedTheSame2()
+    {
+        selectObjectsNamedTheSame(2);
+    }
+
+    [MenuItem("Tools/selection/select objects called the same three levels up")]
+
+    public static void selectObjectsNamedTheSame3()
+    {
+        selectObjectsNamedTheSame(3);
+    }
+
+    [MenuItem("Tools/selection/select objects called the same four levels up")]
+
+    public static void selectObjectsNamedTheSame4()
+    {
+        selectObjectsNamedTheSame(4);
+    }
+
+
+    [MenuItem("Tools/selection/select objects called the same five levels up")]
+
+    public static void selectObjectsNamedTheSame5()
+    {
+        selectObjectsNamedTheSame(5);
+    }
+    public static void selectObjectsNamedTheSame(int level)
+    {   level++;
+        string selName=Selection.activeGameObject.name;
+        
+        Transform transform=Selection.activeGameObject.transform;
+        for (int i=0;i<level;i++)
+         transform=transform.parent;
+       // Debug.Log("parent object is "+transform.gameObject.name);
+        Transform[] all=transform.gameObject.GetComponentsInChildren<Transform>();
+        List<GameObject> g=new List<GameObject>();
+        int activeObjects=0;
+        int inactiveObjects=0;
+        for (int i=0;i<all.Length;i++)
+        {
+            if (all[i].name.Equals(selName))
+            {  g.Add(all[i].gameObject);
+               if (all[i].gameObject.activeInHierarchy) activeObjects++; else inactiveObjects++;
+                }
+        }
+        Selection.objects=g.ToArray();
+        Debug.Log("selected "+g.Count+" objects "+activeObjects+" active "+ inactiveObjects+" inactive");
+
+
+    }
+
     [MenuItem("GameObject/UI/UI Subobjects/Hide Objects with UI tags")]
 
     public static void HideUITags()
@@ -83,63 +144,66 @@ public static class ImageEditorUtilities
         EditorApplication.RepaintHierarchyWindow();
     }
 
-  [MenuItem("GameObject/Create Empty Parent")] // #&e
-        static void createEmptyParent() {
-            GameObject go = new GameObject("GameObject");
-            if(Selection.activeTransform != null)
-            {
- 
-                    go.transform.parent = Selection.activeTransform.parent;
- 
-                    go.transform.Translate(Selection.activeTransform.position);
- 
-                    Selection.activeTransform.parent = go.transform;
- 
-            }
- 
-        }  
- 
- 
-        [MenuItem("GameObject/Create Empty Duplicate")] // #&d
-        static void createEmptyDuplicate() {
- 
-            GameObject go = new GameObject("GameObject");
- 
-            if(Selection.activeTransform != null)
-            {
-                go.transform.parent = Selection.activeTransform.parent;
-                go.transform.Translate(Selection.activeTransform.position);
-            }
- 
-        }
- 
-        [MenuItem("GameObject/Create Empty Child")] // #&c
-        static void createEmptyChild() {
- 
-            GameObject go = new GameObject("GameObject");
- 
-            if(Selection.activeTransform != null)
-            {
-                    go.transform.parent = Selection.activeTransform;
-                    go.transform.Translate(Selection.activeTransform.position);
-            }
- 
+    [MenuItem("GameObject/Create Empty Parent")] // #&e
+    static void createEmptyParent()
+    {
+        GameObject go = new GameObject("GameObject");
+        if (Selection.activeTransform != null)
+        {
+
+            go.transform.parent = Selection.activeTransform.parent;
+
+            go.transform.Translate(Selection.activeTransform.position);
+
+            Selection.activeTransform.parent = go.transform;
+
         }
 
+    }
 
-    
- 
- [MenuItem("Edit/PasteAsChild %&v")]
-public static void PasteAsChild()
-{
-  
-  GameObject x=Selection.activeGameObject;
 
-    EditorWindow.focusedWindow.SendEvent(EditorGUIUtility.CommandEvent("Paste"));
- 
- Selection.activeGameObject.transform.SetParent(x.transform);
+    [MenuItem("GameObject/Create Empty Duplicate")] // #&d
+    static void createEmptyDuplicate()
+    {
 
-}
+        GameObject go = new GameObject("GameObject");
+
+        if (Selection.activeTransform != null)
+        {
+            go.transform.parent = Selection.activeTransform.parent;
+            go.transform.Translate(Selection.activeTransform.position);
+        }
+
+    }
+
+    [MenuItem("GameObject/Create Empty Child")] // #&c
+    static void createEmptyChild()
+    {
+
+        GameObject go = new GameObject("GameObject");
+
+        if (Selection.activeTransform != null)
+        {
+            go.transform.parent = Selection.activeTransform;
+            go.transform.Translate(Selection.activeTransform.position);
+        }
+
+    }
+
+
+
+
+    [MenuItem("Edit/PasteAsChild %&v")]
+    public static void PasteAsChild()
+    {
+
+        GameObject x = Selection.activeGameObject;
+
+        EditorWindow.focusedWindow.SendEvent(EditorGUIUtility.CommandEvent("Paste"));
+
+        Selection.activeGameObject.transform.SetParent(x.transform);
+
+    }
     [MenuItem("GameObject/UI/UI Subobjects/Show Objects with UI tags")]
 
     public static void ShowUITags()
@@ -344,46 +408,33 @@ static GameObject[] sels;
 
         RectTransform r = parentRect.AddChild();
         Image i = r.AddImageChild();//;
+        i.gameObject.AddLayoutElementFlexible();
 
         Selection.activeGameObject = i.gameObject;
     }
-    [MenuItem("GameObject/UI/Text Child")]
-    static void AddText()
+    [MenuItem("GameObject/UI/Image->RawImage")]
+    static void ImageToRawImage()
     {
-        if (Selection.activeGameObject == null)
-        { Debug.Log("select parent gameObject"); return; }
-        Undo.RecordObject(Selection.activeGameObject, "Adding text");
-        GameObject go = new GameObject();
+                Undo.RecordObject(Selection.activeGameObject, "Converting image");
+                int k=0;
+                for (int i=0;i<Selection.gameObjects.Length;i++)
+                {
+                    GameObject g=Selection.gameObjects[i];
+                    Image image=g.GetComponent<Image>();
+                    if (image!=null)
+                    {
+                        Material m=image.material;
+                        Texture t=image.sprite.texture;
+                         MonoBehaviour.DestroyImmediate(image);
+                        RawImage raw=g.AddComponent<RawImage>();
+                        raw.texture=t;
+                        raw.material=m;
+                            k++;
 
-        RectTransform rect;
-        rect = go.getRect();
-        rect.sizeDelta = new Vector2(160, 30);
-        if (rect == null) rect = go.AddComponent<RectTransform>();
-        LayoutGroup lg = Selection.activeGameObject.GetComponent<LayoutGroup>();
-        if (lg != null)
-        {
-            LayoutElement le = go.AddComponent<LayoutElement>();
+                    }
+                }
+                Debug.Log("Converted "+k+" images to rawimage");
 
-            le.preferredWidth = rect.rect.width;
-            le.preferredHeight = rect.rect.height;
-        }
-
-        go.transform.SetParent(Selection.activeGameObject.transform);
-        Text text = go.AddComponent<Text>();
-        text.color = Color.white;
-
-        text.text = "Text";
-        text.alignment = TextAnchor.MiddleCenter;
-
-        rect.localPosition = Vector2.zero;
-        rect.anchorMin = new Vector2(0, 0);
-        rect.anchorMax = new Vector2(1, 1);
-        //	rect.sizeDelta=new Vector2(10,10);
-        rect.offsetMin = new Vector2(0, 0);
-        rect.offsetMax = new Vector2(0, 0);
-        rect.localPosition = Vector2.zero;
-        go.name = "Text";
-        Selection.activeGameObject = go;
     }
 
 }

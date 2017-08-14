@@ -2,7 +2,7 @@
 using UnityEditor;  
 using System.Reflection;
 
-
+ 
    [CanEditMultipleObjects] // Don't ruin everyone's day
    [CustomEditor(typeof(MonoBehaviour), true)] // Target all MonoBehaviours and descendants
    public class MonoBehaviourCustomEditor : UnityEditor.Editor
@@ -24,8 +24,8 @@ using System.Reflection;
                var attributes = method.GetCustomAttributes(typeof(ExposeMethodInEditorAttribute), true);
                if (attributes.Length > 0)
                {
-
-                  if (GUILayout.Button("Run: " + method.Name))
+// if (GUILayout.Button("Exec: " + method.Name))
+                  if (GUILayout.Button(method.Name))
                   {
                      // If the user clicks the button, invoke the method immediately.
                      // There are many ways to do this but I chose to use Invoke which only works in Play Mode.
@@ -34,7 +34,6 @@ using System.Reflection;
                     //    MethodInfo info = type.GetMethod(method.Name); //,  BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                         MethodInfo info = type.GetMethod(method.Name,  BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                         info.Invoke(t,null);
-                        
                         //new object[] {  }
                   }
                }
@@ -42,3 +41,4 @@ using System.Reflection;
          }
       }
    }
+   
