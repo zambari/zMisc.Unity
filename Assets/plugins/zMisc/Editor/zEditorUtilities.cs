@@ -258,6 +258,14 @@ public static class zEditorUtilities
 
 
     }
+    /*
+    
+     var components = GetComponents<Component>();
+Then loop through those components and do:
+
+ UnityEditorInternal.ComponentUtility.CopyComponent(components[i]);
+ UnityEditorInternal.ComponentUtility.PasteComponentAsNew(targetGameObject);
+     */
     static GameObject[] storedSelection;
     [MenuItem("Edit/Selection/markForSelection %#c")]
     static void storeSelection()
@@ -276,7 +284,7 @@ public static class zEditorUtilities
     {
 
         if (storedSelection == null)
-        {
+        { EditorApplication.ExecuteMenuItem("Edit/Paste%v");
             Debug.Log("nothing marked for selction");
         }
         else

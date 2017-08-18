@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EventToggleActive : MonoRect
+public class EventToggleActive : MonoBehaviour
 {
 
     public GameObject target;

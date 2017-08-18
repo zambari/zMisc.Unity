@@ -1,7 +1,6 @@
 ﻿using UnityEngine.Events;
 
 [System.Serializable]
-
 public class StringEvent : UnityEvent <string> {}
 [System.Serializable]
 public class IntEvent : UnityEvent <int> {}
@@ -17,7 +16,7 @@ public class BoolEvent : UnityEvent <bool> {}
 [System.Serializable]
 public class VoidEvent : UnityEvent  {}
 
-public static class eventExtensions
+public static class EventsExtenedWithParameters
 {   public static void AddOnce(this DoubleEvent thisEvent, UnityAction<double> reciever)
     {
             thisEvent.RemoveListener(reciever);
