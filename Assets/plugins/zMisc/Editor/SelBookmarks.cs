@@ -9,6 +9,7 @@ public class SelBookmarks : EditorWindow
     [MenuItem("Tools/Open Selection Bookmarks")]
     static void Init()
     {
+        #pragma warning disable 219
         SelBookmarks window =
             (SelBookmarks)EditorWindow.GetWindow(typeof(SelBookmarks));
     }
