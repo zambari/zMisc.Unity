@@ -6,6 +6,7 @@ Note that it won't necesarily be the source of the lastest version of each scrip
 
 # Selection Bookmarks
 ![selection screenshot](/Screenshots/selectionBookmarks.png?raw=true?raw=true)
+
 An EditorWindow that lets you remember a number of gameObjects and quickly switch active selection between them. You can also Ping (highlight in hierarchy without selection) a given object to make sure this is the one you want to select, rearrange favourites, and toggle gameobjects on and off
 
 ## Select objects named the same
@@ -24,19 +25,23 @@ Safe slider mutes its recieving input just for the time the event is sent - this
 
 # Hierarchy tools
 ![hierarchytools](/Screenshots/hierarchyTools.png?raw=true?raw=true)
+
 I am not a great fan of some default behavious of UnityEditor, for exapmle why does duplicating an object moves it to the bottom of the current hierarchy level (now you can duplicate in place - leaving the clone as next sibling to active object), there's plaste in place (keeps localposition instead of absolute position), create a duplicate of the object but without its children, hiding objects from a given layer in hierarchy (via HideFlags), Duplicate in place, Paste as child, create Image child, 
 
 # Event Extensions
 An ever growing collection of smail tools meant to ease the proces of wiring an event network in Unity Editor without having to create a new file for evry tiny bit of functionality. 
 
 ![event_extensions screenshot](/Screenshots/EventExtensions.png?raw=true?raw=true)
+
 Starting from a set of UnityEvent<type>() definitons, such as FloatEvent (an equivalent of for example SliderEvent), StringEvent (useful to distribute strings) etc, we move on to some basic logic functionality (like EventGate, which triggers either one event, or another, based on some logic state, that is of course changable via other events), touching some very useful tiny scripts that take an integer (or a float which is rounded to int) and if they have a children wich such sibling number, it gets activated, while other children get deactivated), ending on quite flexible Event Processor, which basically performs a y=(x+a)*b+c operation of floats, with a b d c settable via function calls, so you can take for example a slider value, add 0.1f to it, multiply by 0.9f and trigger another FloatEvent with a processed value.
 ![event_extensions screenshot](/Screenshots/EventTools.png?raw=true?raw=true)
+
 The list is likely to grow as I keep using them in projects.
 
 
 # Range.cs
 ![Range](/Screenshots/Range.png?raw=true?raw=true)
+
 A simple class with a CustomPropertyDrawer for setting up ranges. Supports dragging the range, dragging in/out handles.
 
 ## Timeline.cs
@@ -52,6 +57,7 @@ This is really a hack, not a script per say, it gives you 7 sliders for controll
 The point is - this is not runtime, this is editor time, but without a slightest reference to UnityEditor, scriptableObjects etc. It doesn't even need to [ExecuteInEditMode]
 
 ![zcamera screenshot](/Screenshots/cameraInspector.png?raw=true?raw=true)
+
 ## zCameraController.cs
 still work in progress (no map edge detection/ wall detection) but a pretty functional stab at a camera controller script, with middle mouse button movement, scroll movement, rotation around a pivot in front of you.
 
