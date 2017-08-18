@@ -24,6 +24,7 @@ Safe slider mutes its recieving input just for the time the event is sent - this
 
 
 # Hierarchy tools
+
 ![hierarchytools](/Screenshots/hierarchyTools.png?raw=true?raw=true)
 
 I am not a great fan of some default behavious of UnityEditor, for exapmle why does duplicating an object moves it to the bottom of the current hierarchy level (now you can duplicate in place - leaving the clone as next sibling to active object), there's plaste in place (keeps localposition instead of absolute position), create a duplicate of the object but without its children, hiding objects from a given layer in hierarchy (via HideFlags), Duplicate in place, Paste as child, create Image child, 
@@ -34,6 +35,7 @@ An ever growing collection of smail tools meant to ease the proces of wiring an 
 ![event_extensions screenshot](/Screenshots/EventExtensions.png?raw=true?raw=true)
 
 Starting from a set of UnityEvent<type>() definitons, such as FloatEvent (an equivalent of for example SliderEvent), StringEvent (useful to distribute strings) etc, we move on to some basic logic functionality (like EventGate, which triggers either one event, or another, based on some logic state, that is of course changable via other events), touching some very useful tiny scripts that take an integer (or a float which is rounded to int) and if they have a children wich such sibling number, it gets activated, while other children get deactivated), ending on quite flexible Event Processor, which basically performs a y=(x+a)*b+c operation of floats, with a b d c settable via function calls, so you can take for example a slider value, add 0.1f to it, multiply by 0.9f and trigger another FloatEvent with a processed value.
+
 ![event_extensions screenshot](/Screenshots/EventTools.png?raw=true?raw=true)
 
 The list is likely to grow as I keep using them in projects.
