@@ -18,6 +18,8 @@ public class BoolEvent : UnityEvent <bool> {}
 [System.Serializable]
 public class ByteArrayEvent : UnityEvent <byte[]> {}
 
+[System.Serializable]
+public class CharEvent : UnityEvent <char> {}
 
 [System.Serializable]
 public class VoidEvent : UnityEvent  {}
