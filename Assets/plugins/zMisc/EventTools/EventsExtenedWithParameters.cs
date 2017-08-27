@@ -1,4 +1,6 @@
-﻿using UnityEngine.Events;
+﻿//v0.33 byte arra
+
+using UnityEngine.Events;
 
 [System.Serializable]
 public class StringEvent : UnityEvent <string> {}
@@ -12,6 +14,10 @@ public class FloatEvent : UnityEvent <float> {}
 public class DoubleEvent : UnityEvent <double> {} 
 [System.Serializable]
 public class BoolEvent : UnityEvent <bool> {}
+
+[System.Serializable]
+public class ByteArrayEvent : UnityEvent <byte[]> {}
+
 
 [System.Serializable]
 public class VoidEvent : UnityEvent  {}
