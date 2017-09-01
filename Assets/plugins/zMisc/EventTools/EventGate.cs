@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class EventGate : MonoBehaviour {
 
+[SerializeField]
+private bool _gateOpen=true;
+
 public void EventGateInput()
 {
 	if (gateOpen)
@@ -15,8 +18,6 @@ public VoidEvent whenGateOpen;
 public VoidEvent whenGateClosed;
 
 
-[SerializeField]
-private bool _gateOpen;
 public void SetGateOpen(bool b)
 {
 	gateOpen=b;
