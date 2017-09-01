@@ -1,6 +1,7 @@
 ﻿// v.0.4 2017.07.31. startrd numbering those
 // v0.41 texture clear
 // v0.42 byte[] conversions added
+// v0.43 2017.08.29 
 
 using UnityEngine;
 using System;
@@ -12,6 +13,20 @@ using System.Collections.Generic;
 /// oeverrides zRectExtensions
 public static class zExtensions
 {
+	    public static GameObject[] GetChildrenGameObjects(this GameObject go)
+    {
+            return GetChildrenGameObjects(go.transform);
+    }
+	
+	  public static GameObject[] GetChildrenGameObjects(this Transform transform)
+    {
+        GameObject[] children = new GameObject[transform.childCount];
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            children[i] = transform.GetChild(i).gameObject;
+        }
+        return children;
+    }
     public static Color baseColor = new Color(1f / 6, 1f / 2, 1f / 2, 1f / 2); //?
  public static char[] ToCharArray(this byte[] b,int len=1) // 2017.08.18
     {
