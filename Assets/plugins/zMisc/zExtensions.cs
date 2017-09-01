@@ -8,17 +8,20 @@ using System;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using System.Collections.Generic;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 
 /// oeverrides zRectExtensions
 public static class zExtensions
 {
-	    public static GameObject[] GetChildrenGameObjects(this GameObject go)
+    public static GameObject[] GetChildrenGameObjects(this GameObject go)
     {
-            return GetChildrenGameObjects(go.transform);
+        return GetChildrenGameObjects(go.transform);
     }
-	
-	  public static GameObject[] GetChildrenGameObjects(this Transform transform)
+
+    public static GameObject[] GetChildrenGameObjects(this Transform transform)
     {
         GameObject[] children = new GameObject[transform.childCount];
         for (int i = 0; i < transform.childCount; i++)
@@ -28,16 +31,33 @@ public static class zExtensions
         return children;
     }
     public static Color baseColor = new Color(1f / 6, 1f / 2, 1f / 2, 1f / 2); //?
- public static char[] ToCharArray(this byte[] b,int len=1) // 2017.08.18
+    public static char[] ToCharArray(this byte[] b, int len = 1) // 2017.08.18
     {
-		if (len==0) len=b.Length;
-		if (len==-1) return new char[1];
-		Debug.Log(len);
+        if (len == 0) len = b.Length;
+        if (len == -1) return new char[1];
+        Debug.Log(len);
         char[] c = new char[len];
         for (int i = 0; i < len; i++)
             c[i] = (char)b[i];
         return c;
-    }
+    }  
+    
+       public static void DestroySmart(this Component c)
+        {
+
+            if (Application.isPlaying)
+            {
+                MonoBehaviour.Destroy(c);
+            }
+            else
+            {
+#if UNITY_EDITOR
+                EditorApplication.delayCall += () => MonoBehaviour.DestroyImmediate(c);
+#endif
+            }
+
+
+        }
     public static byte[] ToByteArray(this string s)// 2017.08.18
     {
         byte[] byteArray = new byte[s.Length];
@@ -45,13 +65,14 @@ public static class zExtensions
             byteArray[i] = (byte)s[i];
         return byteArray;
     }
-	   public static string ArrayToString(this byte[] b) // 2017.08.18
+    public static string ArrayToString(this byte[] b) // 2017.08.18
     {
-     string s="";
+        string s = "";
         for (int i = 0; i < b.Length; i++)
-		{if (b[0]==0) return s;
-          s+=(char)b[i];
-		}
+        {
+            if (b[0] == 0) return s;
+            s += (char)b[i];
+        }
         return s;
     }
     public static bool executeIfTrue(this bool condition, Action ac)
@@ -66,7 +87,80 @@ public static class zExtensions
             UnityEditorInternal.InternalEditorUtility.SetIsInspectorExpanded(c, false);
 #endif
     }
+    public static void CollapseComponent(this MonoBehaviour mono)
+    {
+        Component c = mono;
+#if UNITY_EDITOR
+        if (c != null)
+            UnityEditorInternal.InternalEditorUtility.SetIsInspectorExpanded(c, false);
+#endif
+    }
+    /// <summary>
+    /// Fades a colour
 
+    /// </summary>
+
+    public static void setAlpha(this Color c, float a)
+    {
+        c.alpha(a);
+    }
+    public static Color alpha(this Color c, float a)
+    {
+        Color m = new Color(c.r, c.g, c.b, a);
+        return m;
+
+    }
+
+    public static float randomizeRespectingNormalisation(this float f, float howMuch)
+    {
+        float n = f + UnityEngine.Random.value * howMuch - howMuch / 2;
+        if (n < 0) n = 0;
+        if (n > 1) n = 1;
+
+
+        return n;
+
+    }
+    public static Color randomize(this Color c, float howMuchHue = 0.15f, float howMuchSat = 0.3f, float howMuchL = 0.2f)
+    {
+        float H, S, L;
+        Color.RGBToHSV(c, out H, out S, out L);
+        H = H.randomizeRespectingNormalisation(howMuchHue);
+        S = S.randomizeRespectingNormalisation(howMuchSat);
+        L = L.randomizeRespectingNormalisation(howMuchL);
+        Color newCol = Color.HSVToRGB(H, S, L);
+        newCol.a = c.a;
+        return newCol;
+    }
+
+    public static Vector3 RandomizeXY(this Vector3 r, float range = 300, bool allowNegatives = true)
+
+    {
+
+        float x = r.x + UnityEngine.Random.value * range;
+        float y = r.y + UnityEngine.Random.value * range;
+        if (!allowNegatives)
+        {
+            if (x < 0) x = x * -1;
+            if (y < 0) y = y * -1;
+        }
+        return new Vector3(x, y, r.z);
+
+    }
+    public static Vector2 Randomize(this Vector2 r, float range = 300, bool allowNegatives = true)
+
+    {
+
+        float x = r.x + UnityEngine.Random.value * range;
+        float y = r.y + UnityEngine.Random.value * range;
+        if (!allowNegatives)
+        {
+            if (x < 0) x = x * -1;
+            if (y < 0) y = y * -1;
+        }
+        return new Vector2(x, y);
+
+    }
     /// <summary>
     /// prints a list of keyframes, in a formsuitable for copy and pasting back to the code to recreate
     /// add a name for it to be present in the output
@@ -76,13 +170,13 @@ public static class zExtensions
         int i = 0;
         string s = "Listing AnimationCurve keyframes\nClick to see full output (multiline) " + (name == null ? " (you can add name too !)" : "") + "  \n\n";
 
-        s+="\n// Begin AnimationCurve dump (copy from here)\n";
+        s += "\n// Begin AnimationCurve dump (copy from here)\n";
         foreach (Keyframe k in a.keys)
         {
-            s +=  name + ".AddKey(new Keyframe(" + k.time + "f," + k.value + "f," + k.inTangent + "f," + k.outTangent + "f));\n";
+            s += name + ".AddKey(new Keyframe(" + k.time + "f," + k.value + "f," + k.inTangent + "f," + k.outTangent + "f));\n";
             i++;
         }
-        Debug.Log(s+"// end keyframe dump (created using zExtensions)\n\n");
+        Debug.Log(s + "// end keyframe dump (created using zExtensions)\n\n");
     }
     public static bool checkFloat(this float f)
     {
@@ -206,20 +300,20 @@ public static class zExtensions
         if (r == null) r = go.AddComponent<RectTransform>();
         return r;
     }
- public static void clear(this Texture2D texture) //, bool apply=true
+    public static void clear(this Texture2D texture) //, bool apply=true
     {
         texture.clear(Color.black);
     }
 
-    public static void clear(this Texture2D texture,Color fillColor) //, bool apply=true
+    public static void clear(this Texture2D texture, Color fillColor) //, bool apply=true
     {
-        Color32[] black=new Color32[texture.width*texture.height];
-        for (int i=0;i<black.Length;i++)
-            black[i]=fillColor;
-    
+        Color32[] black = new Color32[texture.width * texture.height];
+        for (int i = 0; i < black.Length; i++)
+            black[i] = fillColor;
+
         texture.SetPixels32(black);
-        texture.Apply();  
-        
+        texture.Apply();
+
     }
 }
 
@@ -229,7 +323,8 @@ public static class RectExtensions
 {
 
     public static void removeChildren(this Transform transform, int childIndex = 0)
-    {   int k=0;
+    {
+        int k = 0;
         for (int i = transform.childCount - 1; i >= childIndex; i--)
         {
 
@@ -237,7 +332,7 @@ public static class RectExtensions
             MonoBehaviour.Destroy(go);
             k++;
         }
-        Debug.Log("destroyed "+k+" children of "+transform.name,transform.gameObject);
+        Debug.Log("destroyed " + k + " children of " + transform.name, transform.gameObject);
     }
     public static RectTransform AddChild(this RectTransform parentRect)
     {
@@ -253,16 +348,17 @@ public static class RectExtensions
         rect.offsetMin = new Vector2(5, 5);
         rect.offsetMax = new Vector2(-5, -5);
         rect.localPosition = Vector2.zero;
-//Debug.Log(" added child to ",parentRect.gameObject);
-//	Debug.Log("new object is",rect.gameObject);
+        //Debug.Log(" added child to ",parentRect.gameObject);
+        //	Debug.Log("new object is",rect.gameObject);
 
         return rect;
     }
 
 
     public static RectTransform AddChild(this GameObject parent)
-    {  RectTransform parentRect=parent.GetComponent<RectTransform>();
-               return parentRect.AddChild();
+    {
+        RectTransform parentRect = parent.GetComponent<RectTransform>();
+        return parentRect.AddChild();
     }
     public static void LayoutParameters(this VerticalLayoutGroup vl)
     {
