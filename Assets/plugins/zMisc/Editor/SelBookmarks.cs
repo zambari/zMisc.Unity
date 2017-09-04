@@ -4,12 +4,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 
-
 /*
  Title : SelBookmarks ™ 
  Part of  Toucan Universal Libraries
  Autor by : Zambari at http://toucan-systems.pl
  
+ MenuItem: Tools/Open Selection Bookmarks
  Editor window enabling you to remember and restore Hierarchy selections.
  Aslo searches for simiarily named objects within hierarchy (for example objects called Text).
  Theres also a shortcut for toggling the active state of bookmarked objects
@@ -17,6 +17,7 @@ using UnityEditor;
  version 1.01    (2017.09.04)
 
 */
+
 
 public class SelBookmarks : EditorWindow
 {
@@ -29,22 +30,21 @@ public class SelBookmarks : EditorWindow
 #pragma warning restore 219
     }
     [SerializeField]
-    List<GameObject> objects;
+    List<GameObject> bookmarkedObjects;
     GameObject[] namedTheSameLOnLevel0;
     GameObject[] namedTheSameLOnLevel1;
     GameObject[] namedTheSameLOnLevel2;
     GameObject[] namedTheSameLOnLevel3;
     object[] lastSelectionState;
+    bool sorted;
     void OnGUI()
     {
-        if (objects == null) objects = new List<GameObject>();
+        if (bookmarkedObjects == null) bookmarkedObjects = new List<GameObject>();
         else
         {
             int i = 0;
-            while (i < objects.Count)
-            {
-                if (objects[i] == null) objects.RemoveAt(i); else i++;
-            }
+            while (i < bookmarkedObjects.Count)
+                if (bookmarkedObjects[i] == null) bookmarkedObjects.RemoveAt(i); else i++;
         }
         EditorGUILayout.BeginHorizontal();
         if (Selection.activeGameObject == null)
@@ -58,63 +58,73 @@ public class SelBookmarks : EditorWindow
 
         if (GUILayout.Button("Bookmark Selected")) //, GUIStyle.none
             if (Selection.activeObject != null)
-            {
-                if (!objects.Contains(Selection.activeGameObject))
-                    objects.Add(Selection.activeGameObject);
-                else
+            {   sorted=false;
+                for (int i = 0; i < Selection.gameObjects.Length; i++)
                 {
-                    objects.Remove(Selection.activeGameObject);
-                    objects.Insert(0, Selection.activeGameObject);
+                    var thisGameObject = Selection.gameObjects[i];
+                    if (!bookmarkedObjects.Contains(thisGameObject))
+                        bookmarkedObjects.Add(thisGameObject);
+                    else
+                    {
+                        bookmarkedObjects.Remove(thisGameObject);
+                        bookmarkedObjects.Insert(0, thisGameObject);
+                    }
                 }
             }
+        if (bookmarkedObjects.Count > 1 && !sorted)
+            if (GUILayout.Button("Sort")) //, GUIStyle.none
+                sortObjects();
+
+
         GUILayout.FlexibleSpace();
         EditorGUILayout.EndHorizontal();
         GUILayout.Space(10);
-        if (objects.Count > 0)
-            for (int i = 0; i < objects.Count; i++)
+        if (bookmarkedObjects.Count > 0)
+            for (int i = 0; i < bookmarkedObjects.Count; i++)
             {
                 EditorGUILayout.BeginHorizontal();
-                if (GUILayout.Toggle(objects[i].activeInHierarchy, "")) 
-                    objects[i].SetActive(true);
+                if (GUILayout.Toggle(bookmarkedObjects[i].activeInHierarchy, ""))
+                    bookmarkedObjects[i].SetActive(true);
                 else
-                    objects[i].SetActive(false);
-
-
+                    bookmarkedObjects[i].SetActive(false);
                 if (GUILayout.Button("*", EditorStyles.label))
-                    EditorGUIUtility.PingObject(objects[i]);
-                if (GUILayout.Button(" Select: " + objects[i].name + " ")) 
-                    Selection.activeGameObject = objects[i];
-
+                    EditorGUIUtility.PingObject(bookmarkedObjects[i]);
+                if (GUILayout.Button(" Select: " + bookmarkedObjects[i].name + " "))
+                    Selection.activeGameObject = bookmarkedObjects[i];
                 GUILayout.FlexibleSpace();
                 if (i > 0)
-                    if (GUILayout.Button("↟", EditorStyles.label)) 
+                    if (GUILayout.Button("↟", EditorStyles.label))
                     {
-                        GameObject ob = objects[i];
-
-                        objects.RemoveAt(i);
-                        objects.Insert(i - 1, ob);
+                        GameObject ob = bookmarkedObjects[i];
+                        bookmarkedObjects.RemoveAt(i);
+                        bookmarkedObjects.Insert(i - 1, ob);
+                        sorted=false;
                     }
-                if (i < objects.Count - 1)
-                    if (GUILayout.Button("↡", EditorStyles.label)) 
+                if (i < bookmarkedObjects.Count - 1)
+                {
+                    if (GUILayout.Button("↡", EditorStyles.label))
                     {
-                        GameObject ob = objects[i];
-                        objects.RemoveAt(i);
-                        objects.Insert(i + 1, ob);
+                        GameObject ob = bookmarkedObjects[i];
+                        bookmarkedObjects.RemoveAt(i);
+                        bookmarkedObjects.Insert(i + 1, ob);
+                        sorted=false;
                     }
+                }
+                else GUILayout.Label(" ");
                 if (GUILayout.Button("X"))
-                    objects.RemoveAt(i);
+                    bookmarkedObjects.RemoveAt(i);
                 EditorGUILayout.EndHorizontal();
             }
         GUILayout.FlexibleSpace();
         if (Selection.activeGameObject != null)
         {
-            if (Selection.objects!=lastSelectionState)
+            if (Selection.objects != lastSelectionState)
             {
-            lastSelectionState=Selection.objects; 
-            namedTheSameLOnLevel0 = getObjectsNamedTheSameAsCurernt(0); // this is a relatively expensive traversal
-            namedTheSameLOnLevel1 = getObjectsNamedTheSameAsCurernt(1); // so we cache the results
-            namedTheSameLOnLevel2 = getObjectsNamedTheSameAsCurernt(2); // and only do the search if the selection state
-            namedTheSameLOnLevel3 = getObjectsNamedTheSameAsCurernt(3); // is different than on last redraw
+                lastSelectionState = Selection.objects;
+                namedTheSameLOnLevel0 = getObjectsNamedTheSameAsCurernt(0); // this is a relatively expensive traversal
+                namedTheSameLOnLevel1 = getObjectsNamedTheSameAsCurernt(1); // so we cache the results
+                namedTheSameLOnLevel2 = getObjectsNamedTheSameAsCurernt(2); // and only do the search if the selection state
+                namedTheSameLOnLevel3 = getObjectsNamedTheSameAsCurernt(3); // is different than on last redraw
             }
             string currentName = Selection.activeGameObject.name;
             if (namedTheSameLOnLevel0.Length > 1 || namedTheSameLOnLevel1.Length > 1 || namedTheSameLOnLevel2.Length > 1 || namedTheSameLOnLevel3.Length > 1)
@@ -133,12 +143,26 @@ public class SelBookmarks : EditorWindow
                 if (namedTheSameLOnLevel3.Length > 1)
                     if (GUILayout.Button(namedTheSameLOnLevel3.Length + " three levels up"))
                         Selection.objects = namedTheSameLOnLevel3;
-
                 EditorGUILayout.EndHorizontal();
             }
         }
     }
 
+    void sortObjects()
+    {
+        Debug.Log("soring");
+        List<GameObject> sortedList = new List<GameObject>();
+        Transform[] allTransforms = GameObject.FindObjectsOfType(typeof(Transform)) as Transform[];
+
+        for (int i = 0; i < allTransforms.Length; i++)
+        {
+            GameObject thisGameObject=allTransforms[i].gameObject;
+            for (int k = 0; k < bookmarkedObjects.Count; k++)
+                if (thisGameObject == bookmarkedObjects[k]) sortedList.Add(bookmarkedObjects[k]);
+        }
+        bookmarkedObjects = sortedList;
+        sorted=true;
+    }
     public static GameObject[] getObjectsNamedTheSameAsCurernt(int namedTheSameLOnLevel)
     {
         namedTheSameLOnLevel++;
