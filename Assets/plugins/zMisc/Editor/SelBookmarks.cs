@@ -37,6 +37,7 @@ public class SelBookmarks : EditorWindow
     GameObject[] namedTheSameLOnLevel3;
     object[] lastSelectionState;
     bool sorted;
+    bool soloMode;
     void OnGUI()
     {
         if (bookmarkedObjects == null) bookmarkedObjects = new List<GameObject>();
@@ -58,7 +59,8 @@ public class SelBookmarks : EditorWindow
 
         if (GUILayout.Button("Bookmark Selected")) //, GUIStyle.none
             if (Selection.activeObject != null)
-            {   sorted=false;
+            {
+                sorted = false;
                 for (int i = 0; i < Selection.gameObjects.Length; i++)
                 {
                     var thisGameObject = Selection.gameObjects[i];
@@ -75,6 +77,7 @@ public class SelBookmarks : EditorWindow
             if (GUILayout.Button("Sort")) //, GUIStyle.none
                 sortObjects();
 
+        soloMode = GUILayout.Toggle(soloMode, "Solo Mode");
 
         GUILayout.FlexibleSpace();
         EditorGUILayout.EndHorizontal();
@@ -83,115 +86,139 @@ public class SelBookmarks : EditorWindow
             for (int i = 0; i < bookmarkedObjects.Count; i++)
             {
                 EditorGUILayout.BeginHorizontal();
+
                 if (GUILayout.Toggle(bookmarkedObjects[i].activeInHierarchy, ""))
-                    bookmarkedObjects[i].SetActive(true);
-                else
-                    bookmarkedObjects[i].SetActive(false);
-                if (GUILayout.Button("*", EditorStyles.label))
-                    EditorGUIUtility.PingObject(bookmarkedObjects[i]);
-                if (GUILayout.Button(" Select: " + bookmarkedObjects[i].name + " "))
-                    Selection.activeGameObject = bookmarkedObjects[i];
-                GUILayout.FlexibleSpace();
-                if (i > 0)
-                    if (GUILayout.Button("↟", EditorStyles.label))
-                    {
-                        GameObject ob = bookmarkedObjects[i];
-                        bookmarkedObjects.RemoveAt(i);
-                        bookmarkedObjects.Insert(i - 1, ob);
-                        sorted=false;
-                    }
-                if (i < bookmarkedObjects.Count - 1)
                 {
-                    if (GUILayout.Button("↡", EditorStyles.label))
+                    bookmarkedObjects[i].SetActive(true);
+                    if (soloMode)
                     {
-                        GameObject ob = bookmarkedObjects[i];
+                        for (int k = 0; k < bookmarkedObjects.Count; k++)
+                        {
+                          if (i!=k)   bookmarkedObjects[k].SetActive(false);
+                        }
+                    }
+
+                }
+                else
+                {
+                    if (!soloMode)
+                    {
+                        bookmarkedObjects[i].SetActive(false);
+                    }
+                  /*  else
+                    {   for (int k = 0; k < bookmarkedObjects.Count; k++)
+                        {
+                          bookmarkedObjects[k].SetActive(true);
+                        }
+
+                    }*/
+                }
+
+                    if (GUILayout.Button("*", EditorStyles.label))
+                        EditorGUIUtility.PingObject(bookmarkedObjects[i]);
+                    if (GUILayout.Button("" + bookmarkedObjects[i].name + " "))
+                        Selection.activeGameObject = bookmarkedObjects[i];
+                    GUILayout.FlexibleSpace();
+                    if (i > 0)
+                        if (GUILayout.Button("↟", EditorStyles.label))
+                        {
+                            GameObject ob = bookmarkedObjects[i];
+                            bookmarkedObjects.RemoveAt(i);
+                            bookmarkedObjects.Insert(i - 1, ob);
+                            sorted = false;
+                        }
+                    if (i < bookmarkedObjects.Count - 1)
+                    {
+                        if (GUILayout.Button("↡", EditorStyles.label))
+                        {
+                            GameObject ob = bookmarkedObjects[i];
+                            bookmarkedObjects.RemoveAt(i);
+                            bookmarkedObjects.Insert(i + 1, ob);
+                            sorted = false;
+                        }
+                    }
+                    else GUILayout.Label(" ");
+                    if (GUILayout.Button("X"))
                         bookmarkedObjects.RemoveAt(i);
-                        bookmarkedObjects.Insert(i + 1, ob);
-                        sorted=false;
+                    EditorGUILayout.EndHorizontal();
+                }
+                GUILayout.FlexibleSpace();
+                if (Selection.activeGameObject != null)
+                {
+                    if (Selection.objects != lastSelectionState)
+                    {
+                        lastSelectionState = Selection.objects;
+                        namedTheSameLOnLevel0 = getObjectsNamedTheSameAsCurernt(0); // this is a relatively expensive traversal
+                        namedTheSameLOnLevel1 = getObjectsNamedTheSameAsCurernt(1); // so we cache the results
+                        namedTheSameLOnLevel2 = getObjectsNamedTheSameAsCurernt(2); // and only do the search if the selection state
+                        namedTheSameLOnLevel3 = getObjectsNamedTheSameAsCurernt(3); // is different than on last redraw
+                    }
+                    string currentName = Selection.activeGameObject.name;
+                    if (namedTheSameLOnLevel0.Length > 1 || namedTheSameLOnLevel1.Length > 1 || namedTheSameLOnLevel2.Length > 1 || namedTheSameLOnLevel3.Length > 1)
+                    {
+                        GUILayout.Label("Found some objects also named \"" + currentName + "\"");
+                        EditorGUILayout.BeginHorizontal();
+                        if (namedTheSameLOnLevel0.Length > 1)
+                            if (GUILayout.Button(namedTheSameLOnLevel0.Length + " siblings"))
+                                Selection.objects = namedTheSameLOnLevel0;
+                        if (namedTheSameLOnLevel1.Length > 1)
+                            if (GUILayout.Button(namedTheSameLOnLevel1.Length + " one level up"))
+                                Selection.objects = namedTheSameLOnLevel1;
+                        if (namedTheSameLOnLevel2.Length > 1)
+                            if (GUILayout.Button(namedTheSameLOnLevel2.Length + " two levels up"))
+                                Selection.objects = namedTheSameLOnLevel2;
+                        if (namedTheSameLOnLevel3.Length > 1)
+                            if (GUILayout.Button(namedTheSameLOnLevel3.Length + " three levels up"))
+                                Selection.objects = namedTheSameLOnLevel3;
+                        EditorGUILayout.EndHorizontal();
                     }
                 }
-                else GUILayout.Label(" ");
-                if (GUILayout.Button("X"))
-                    bookmarkedObjects.RemoveAt(i);
-                EditorGUILayout.EndHorizontal();
             }
-        GUILayout.FlexibleSpace();
-        if (Selection.activeGameObject != null)
+
+        void sortObjects()
         {
-            if (Selection.objects != lastSelectionState)
+            Debug.Log("soring");
+            List<GameObject> sortedList = new List<GameObject>();
+            Transform[] allTransforms = GameObject.FindObjectsOfType(typeof(Transform)) as Transform[];
+
+            for (int i = 0; i < allTransforms.Length; i++)
             {
-                lastSelectionState = Selection.objects;
-                namedTheSameLOnLevel0 = getObjectsNamedTheSameAsCurernt(0); // this is a relatively expensive traversal
-                namedTheSameLOnLevel1 = getObjectsNamedTheSameAsCurernt(1); // so we cache the results
-                namedTheSameLOnLevel2 = getObjectsNamedTheSameAsCurernt(2); // and only do the search if the selection state
-                namedTheSameLOnLevel3 = getObjectsNamedTheSameAsCurernt(3); // is different than on last redraw
+                GameObject thisGameObject = allTransforms[i].gameObject;
+                for (int k = 0; k < bookmarkedObjects.Count; k++)
+                    if (thisGameObject == bookmarkedObjects[k]) sortedList.Add(bookmarkedObjects[k]);
             }
-            string currentName = Selection.activeGameObject.name;
-            if (namedTheSameLOnLevel0.Length > 1 || namedTheSameLOnLevel1.Length > 1 || namedTheSameLOnLevel2.Length > 1 || namedTheSameLOnLevel3.Length > 1)
+            bookmarkedObjects = sortedList;
+            sorted = true;
+        }
+        public static GameObject[] getObjectsNamedTheSameAsCurernt(int namedTheSameLOnLevel)
+        {
+            namedTheSameLOnLevel++;
+            string selName = Selection.activeGameObject.name;
+            Transform thisTransform = Selection.activeGameObject.transform;
+            for (int i = 0; i < namedTheSameLOnLevel; i++)
             {
-                GUILayout.Label("Found some objects also named \"" + currentName + "\"");
-                EditorGUILayout.BeginHorizontal();
-                if (namedTheSameLOnLevel0.Length > 1)
-                    if (GUILayout.Button(namedTheSameLOnLevel0.Length + " siblings"))
-                        Selection.objects = namedTheSameLOnLevel0;
-                if (namedTheSameLOnLevel1.Length > 1)
-                    if (GUILayout.Button(namedTheSameLOnLevel1.Length + " one level up"))
-                        Selection.objects = namedTheSameLOnLevel1;
-                if (namedTheSameLOnLevel2.Length > 1)
-                    if (GUILayout.Button(namedTheSameLOnLevel2.Length + " two levels up"))
-                        Selection.objects = namedTheSameLOnLevel2;
-                if (namedTheSameLOnLevel3.Length > 1)
-                    if (GUILayout.Button(namedTheSameLOnLevel3.Length + " three levels up"))
-                        Selection.objects = namedTheSameLOnLevel3;
-                EditorGUILayout.EndHorizontal();
+                if (thisTransform.parent == null) return new GameObject[0];
+                thisTransform = thisTransform.parent;
             }
+            Transform[] all = thisTransform.gameObject.GetComponentsInChildren<Transform>(true);
+            List<GameObject> gameObjects = new List<GameObject>();
+            int activeObjects = 0;
+            int inactiveObjects = 0;
+            for (int i = 0; i < all.Length; i++)
+                if (all[i].name.Equals(selName))
+                {
+                    gameObjects.Add(all[i].gameObject);
+                    if (all[i].gameObject.activeInHierarchy) activeObjects++; else inactiveObjects++;
+                }
+            return gameObjects.ToArray();
+        }
+
+        void OnSelectionChange()
+        {
+            Repaint();
+        }
+        void OnHierarchyChange()
+        {
+            Repaint();
         }
     }
-
-    void sortObjects()
-    {
-        Debug.Log("soring");
-        List<GameObject> sortedList = new List<GameObject>();
-        Transform[] allTransforms = GameObject.FindObjectsOfType(typeof(Transform)) as Transform[];
-
-        for (int i = 0; i < allTransforms.Length; i++)
-        {
-            GameObject thisGameObject=allTransforms[i].gameObject;
-            for (int k = 0; k < bookmarkedObjects.Count; k++)
-                if (thisGameObject == bookmarkedObjects[k]) sortedList.Add(bookmarkedObjects[k]);
-        }
-        bookmarkedObjects = sortedList;
-        sorted=true;
-    }
-    public static GameObject[] getObjectsNamedTheSameAsCurernt(int namedTheSameLOnLevel)
-    {
-        namedTheSameLOnLevel++;
-        string selName = Selection.activeGameObject.name;
-        Transform thisTransform = Selection.activeGameObject.transform;
-        for (int i = 0; i < namedTheSameLOnLevel; i++)
-        {
-            if (thisTransform.parent == null) return new GameObject[0];
-            thisTransform = thisTransform.parent;
-        }
-        Transform[] all = thisTransform.gameObject.GetComponentsInChildren<Transform>(true);
-        List<GameObject> gameObjects = new List<GameObject>();
-        int activeObjects = 0;
-        int inactiveObjects = 0;
-        for (int i = 0; i < all.Length; i++)
-            if (all[i].name.Equals(selName))
-            {
-                gameObjects.Add(all[i].gameObject);
-                if (all[i].gameObject.activeInHierarchy) activeObjects++; else inactiveObjects++;
-            }
-        return gameObjects.ToArray();
-    }
-
-    void OnSelectionChange()
-    {
-        Repaint();
-    }
-    void OnHierarchyChange()
-    {
-        Repaint();
-    }
-}
