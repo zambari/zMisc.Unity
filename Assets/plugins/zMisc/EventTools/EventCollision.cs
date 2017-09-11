@@ -8,30 +8,30 @@ public class EventCollision : MonoBehaviour
 {
     #pragma warning disable 414
     public UnityEvent OnTriggerOrCollision;
-    [SerializeField]
+    /*[SerializeField]
     [ReadOnly]
     bool wasTrigger;
     [SerializeField]
     [ReadOnly]
-    bool wasCollision;
+    bool wasCollision;*/
     protected virtual void OnCollisionEnter()
     {
         OnTriggerOrCollision.Invoke();
-        wasTrigger = false;
-        wasCollision = true;
+      //  wasTrigger = false;
+       // wasCollision = true;
     }
 
     protected virtual void OnTriggerEnter()
     {
         OnTriggerOrCollision.Invoke();
-        wasTrigger = true;
-        wasCollision = false;
+     //   wasTrigger = true;
+   //     wasCollision = false;
     }
 
     void OnValidate()
     {
-        wasTrigger = false;
-        wasCollision = false;
+     //   wasTrigger = false;
+      //  wasCollision = false;
     }
 
 

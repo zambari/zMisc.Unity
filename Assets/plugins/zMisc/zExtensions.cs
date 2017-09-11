@@ -31,7 +31,7 @@ public static class zExtensions
         return children;
     }
     public static Color baseColor = new Color(1f / 6, 1f / 2, 1f / 2, 1f / 2); //?
-    public static char[] ToCharArray(this byte[] b, int len = 1) // 2017.08.18
+ public static char[] ToCharArray(this byte[] b,int len=0) // 2017.08.18
     {
         if (len == 0) len = b.Length;
         if (len == -1) return new char[1];
@@ -225,6 +225,8 @@ public static class zExtensions
         return t;
     }
 
+
+[System.Obsolete("use isActiveAndEnabled - i didn't know it existed")]
     public static bool disabled(this MonoBehaviour source)
 
     {
