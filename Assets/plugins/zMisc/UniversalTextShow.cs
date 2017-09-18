@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Text))]
+[ExecuteInEditMode]
 public class UniversalTextShow : MonoBehaviour
 {
     public string currentValue;
