@@ -45,18 +45,30 @@ public class SimpleConsole : MonoRect
 
         }
     }
-
+bool logDirty;
  public void log(string logentry)
     {if (logList==null) return;
             if (logList.Count >= maxLines) logList.RemoveAt(0);
             logList.Add(logentry);
-            buildLog();
+            logDirty=true;
+            
             if (alsoLogToConsole) Debug.Log(logentry);
-            if (autoHideLines)
-                StartCoroutine(Remover());
+            
 
     }
 
+
+void Update()
+{
+
+    if (logDirty)
+    {
+        logDirty=false;
+        buildLog();
+            if (autoHideLines)
+                StartCoroutine(Remover());
+    }
+}
     IEnumerator Remover()
     {
         yield return new WaitForSeconds(autoHideTime);
