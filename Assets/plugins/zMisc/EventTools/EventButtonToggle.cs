@@ -5,7 +5,8 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 [RequireComponent(typeof(Button))]
 public class EventButtonToggle : MonoBehaviour
-{
+{    [SerializeField]
+    Text text;
     public string labelPrimary = "button off";
     public string labelSecondary = "button on";
 
@@ -41,16 +42,14 @@ void Reset()
     public UnityEvent onToggleOn;
     public UnityEvent onToggleOff;
     public BoolEvent onStateChange;
-    [SerializeField]
-    [HideInInspector]
-    Text text;
+
     [SerializeField]
     [HideInInspector]
     Button b;
 
     protected virtual void OnValidate()
     {
-        if (text == null) text = GetComponentInChildren<Text>();
+     //   if (text == null) text = GetComponentInChildren<Text>();
         if (b == null) b = GetComponent<Button>();
 		
         state = _state;

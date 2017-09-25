@@ -64,7 +64,11 @@ public class UniversalTextShow : MonoBehaviour
     {
         get { if (_text == null) _text = GetComponent<Text>(); return _text; }
     }
-
+void OnEnable()
+{
+          getSource();
+          GetCurrentValue();
+}
     void Update()
     {
         //		if (sourceType==SourcType)
