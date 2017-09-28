@@ -19,6 +19,33 @@ using UnityEditor;
 */
 
 
+public static class ObjectEnableToggle
+{
+
+    [MenuItem("Tools/Actions/Toggle Enabled  _`")]
+    static void toggleEnabled()
+    {
+        if (Selection.activeGameObject != null)
+        {
+            Selection.activeGameObject.SetActive(!Selection.activeGameObject.activeSelf);
+            if (Selection.activeGameObject.activeSelf
+             && !Selection.activeGameObject.activeInHierarchy)
+            {
+                Transform thisTransform = Selection.activeGameObject.transform.parent;
+                while (thisTransform != null)
+                {
+                    if (thisTransform.gameObject.activeInHierarchy == false)
+                        thisTransform.gameObject.SetActive(true);
+
+                    thisTransform = thisTransform.parent;
+                }
+            }
+
+        }
+    }
+}
+
+
 public class SelBookmarks : EditorWindow
 {
     [MenuItem("Tools/Open Selection Bookmarks")]
@@ -116,7 +143,7 @@ public class SelBookmarks : EditorWindow
 
                     if (GUILayout.Button("*", EditorStyles.label))
                         EditorGUIUtility.PingObject(bookmarkedObjects[i]);
-                    if (GUILayout.Button("" + bookmarkedObjects[i].name + " "))
+                    if (GUILayout.Button("" + bookmarkedObjects[i].name + " ",EditorStyles.miniButton))
                         Selection.activeGameObject = bookmarkedObjects[i];
                     GUILayout.FlexibleSpace();
                     if (i > 0)
@@ -138,7 +165,7 @@ public class SelBookmarks : EditorWindow
                         }
                     }
                     else GUILayout.Label(" ");
-                    if (GUILayout.Button("X"))
+                    if (GUILayout.Button("X", EditorStyles.miniButton))
                         bookmarkedObjects.RemoveAt(i);
                     EditorGUILayout.EndHorizontal();
                 }
