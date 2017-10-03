@@ -16,6 +16,7 @@ using UnityEditor;
 /// oeverrides zRectExtensions
 public static class zExtensions
 {
+    
     public static GameObject[] GetChildrenGameObjects(this GameObject go)
     {
         return GetChildrenGameObjects(go.transform);
@@ -31,7 +32,7 @@ public static class zExtensions
         return children;
     }
     public static Color baseColor = new Color(1f / 6, 1f / 2, 1f / 2, 1f / 2); //?
- public static char[] ToCharArray(this byte[] b,int len=0) // 2017.08.18
+    public static char[] ToCharArray(this byte[] b, int len = 0) // 2017.08.18
     {
         if (len == 0) len = b.Length;
         if (len == -1) return new char[1];
@@ -40,24 +41,24 @@ public static class zExtensions
         for (int i = 0; i < len; i++)
             c[i] = (char)b[i];
         return c;
-    }  
-    
-       public static void DestroySmart(this Component c)
+    }
+
+    public static void DestroySmart(this Component c)
+    {
+
+        if (Application.isPlaying)
         {
-
-            if (Application.isPlaying)
-            {
-                MonoBehaviour.Destroy(c);
-            }
-            else
-            {
-#if UNITY_EDITOR
-                EditorApplication.delayCall += () => MonoBehaviour.DestroyImmediate(c);
-#endif
-            }
-
-
+            MonoBehaviour.Destroy(c);
         }
+        else
+        {
+#if UNITY_EDITOR
+            EditorApplication.delayCall += () => MonoBehaviour.DestroyImmediate(c);
+#endif
+        }
+
+
+    }
     public static byte[] ToByteArray(this string s)// 2017.08.18
     {
         byte[] byteArray = new byte[s.Length];
@@ -226,7 +227,7 @@ public static class zExtensions
     }
 
 
-[System.Obsolete("use isActiveAndEnabled - i didn't know it existed")]
+    [System.Obsolete("use isActiveAndEnabled - i didn't know it existed")]
     public static bool disabled(this MonoBehaviour source)
 
     {
@@ -309,6 +310,10 @@ public static class zExtensions
 
     public static void clear(this Texture2D texture, Color fillColor) //, bool apply=true
     {
+        Fill(texture, fillColor);
+    }
+    public static void Fill(this Texture2D texture, Color fillColor) //, bool apply=true
+    {
         Color32[] black = new Color32[texture.width * texture.height];
         for (int i = 0; i < black.Length; i++)
             black[i] = fillColor;
@@ -317,6 +322,45 @@ public static class zExtensions
         texture.Apply();
 
     }
+    public static void Multiply(this Texture2D texture, Color fillColor) //, bool apply=true
+    {
+        Color32[] colors = texture.GetPixels32();
+        for (int i = 0; i < colors.Length; i++)
+            colors[i] = colors[i] * fillColor;
+
+        texture.SetPixels32(colors);
+        texture.Apply();
+
+    }
+
+    public static void Add(this Texture2D texture, Color fillColor) //, bool apply=true
+    {
+        Color32[] colors = texture.GetPixels32();
+        for (int i = 0; i < colors.Length; i++)
+            colors[i] = colors[i] + fillColor;
+        texture.SetPixels32(colors);
+        texture.Apply();
+
+    }
+/* 
+    #if UNITY_EDITOR
+public static void SetTextureImporterFormat( this Texture2D texture, bool isReadable)
+{
+    if ( null == texture ) return;
+
+    string assetPath = AssetDatabase.GetAssetPath( texture );
+    var tImporter = AssetImporter.GetAtPath( assetPath ) as TextureImporter;
+    if ( tImporter != null )
+    {
+        tImporter.textureType = TextureImporterType.Default;
+
+        tImporter.isReadable = isReadable;
+
+        AssetDatabase.ImportAsset( assetPath );
+        AssetDatabase.Refresh();
+    }
+}
+    #endif*/
 }
 
 
