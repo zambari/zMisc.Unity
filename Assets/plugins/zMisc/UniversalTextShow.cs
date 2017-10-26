@@ -12,14 +12,15 @@ public class UniversalTextShow : MonoBehaviour
     public static BindingFlags bindingLibrealFlag = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic;
     public enum SourceTypes { Field, Property };
     public enum SourceValueTypes { Float, String };
+    [ClickableEnum]
     public SourceValueTypes sourceValueType;
     FieldInfo fieldInfo;
     PropertyInfo propertyInfo;
     public bool showPrivate;
     [SerializeField]
-    float b;
+        float b;
     [SerializeField]
-    //[HideInInspector]
+    [ClickableEnum]
     SourceTypes _sourceType;
     public bool showVariableName = true;
     public bool newLineAfterVarName = true;

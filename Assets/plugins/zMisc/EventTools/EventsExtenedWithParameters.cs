@@ -1,6 +1,7 @@
 ﻿//v0.33 byte arra
-
+//v0.34 vector3
 using UnityEngine.Events;
+using UnityEngine;
 
 [System.Serializable]
 public class StringEvent : UnityEvent <string> {}
@@ -20,6 +21,8 @@ public class ByteArrayEvent : UnityEvent <byte[]> {}
 
 [System.Serializable]
 public class CharEvent : UnityEvent <char> {}
+[System.Serializable]
+public class Vector3Event : UnityEvent <Vector3> {}
 
 [System.Serializable]
 public class VoidEvent : UnityEvent  {}

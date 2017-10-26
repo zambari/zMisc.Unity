@@ -2,30 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+#pragma warning disable 414
+#pragma warning disable 219
 public class NameHelper
 {
     MonoBehaviour mono;
-    const char seperator = '\uFEFF';
+    const char seperator = '\uFEFF'; // unicode whitespace
     const string extraSpace = "  ";
-    bool useCached;
+  //  bool useCached;
     string baseName;
     bool isMangledCached;
     bool useSecondTag = false;
+    string _tag = "";
+    string _tagPost = "";
     public bool isMangled
     {
         get
         {
-            if (!useCached)
+       //     if (!useCached)
                 return (mono.name.Contains(seperator.ToString()));
-            else
-                return
-                isMangledCached;
-
+       //     else
+         //       return isMangledCached;
         }
     }
-    string _tag = "";
-    string _tagPost = "";
+
     public string tag
     {
         get { return _tag; }
@@ -95,20 +95,18 @@ void setDecorators(string a, string b)
         set { RemoveTag(); }
     }
 
-
-
     public string unMangled
     {
         get
         {
-            if (!useCached)
-            {
+         //   if (!useCached)
+         //   {
                 string[] split = mono.name.Split(seperator);
                 if (split.Length < 2) return mono.name;
                 return split[1];
-            }
-            else
-                return baseName;
+         //   }
+        //    else
+      //         return baseName;
         }
     }
     public NameHelper(MonoBehaviour source)

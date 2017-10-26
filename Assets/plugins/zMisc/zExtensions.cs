@@ -2,12 +2,15 @@
 // v0.41 texture clear
 // v0.42 byte[] conversions added
 // v0.43 2017.08.29 
+// v0.44 random string 
 
 using UnityEngine;
 using System;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Text;
+using System.IO;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -16,7 +19,7 @@ using UnityEditor;
 /// oeverrides zRectExtensions
 public static class zExtensions
 {
-    
+
     public static GameObject[] GetChildrenGameObjects(this GameObject go)
     {
         return GetChildrenGameObjects(go.transform);
@@ -81,16 +84,25 @@ public static class zExtensions
         if (condition) ac.Invoke();
         return false;
     }
-    public static void CollapseComponent(this MonoBehaviour mono, Component c)
+    public static void CollapseComponent(this MonoBehaviour mono, Component c, bool expanded = false)
     {
 #if UNITY_EDITOR
         if (c != null)
             UnityEditorInternal.InternalEditorUtility.SetIsInspectorExpanded(c, false);
 #endif
     }
-    public static void CollapseComponent(this MonoBehaviour mono)
+    public static void CollapseComponent(this MonoBehaviour mono, bool expanded = false)
     {
         Component c = mono;
+#if UNITY_EDITOR
+        if (c != null)
+            UnityEditorInternal.InternalEditorUtility.SetIsInspectorExpanded(c, false);
+#endif
+    }
+
+
+    public static void CollapseComponent(this Component c, bool expanded = false)
+    {
 #if UNITY_EDITOR
         if (c != null)
             UnityEditorInternal.InternalEditorUtility.SetIsInspectorExpanded(c, false);
@@ -162,6 +174,35 @@ public static class zExtensions
         return new Vector2(x, y);
 
     }
+
+
+/// <summary>
+/// Copied from https://gist.github.com/maxattack/4c7b4de00f5c1b95a33b
+/// </summary>
+	public static Quaternion SmoothDamp( Quaternion rot, Quaternion target, ref Quaternion deriv, float time) {
+		// account for double-cover
+		var Dot = Quaternion.Dot(rot, target);
+		var Multi = Dot > 0f ? 1f : -1f;
+		target.x *= Multi;
+		target.y *= Multi;
+		target.z *= Multi;
+		target.w *= Multi;
+		// smooth damp (nlerp approx)
+		var Result = new Vector4(
+			Mathf.SmoothDamp(rot.x, target.x, ref deriv.x, time),
+			Mathf.SmoothDamp(rot.y, target.y, ref deriv.y, time),
+			Mathf.SmoothDamp(rot.z, target.z, ref deriv.z, time),
+			Mathf.SmoothDamp(rot.w, target.w, ref deriv.w, time)
+		).normalized;
+		// compute deriv
+		var dtInv = 1f / Time.deltaTime;
+		deriv.x = (Result.x - rot.x) * dtInv;
+		deriv.y = (Result.y - rot.y) * dtInv;
+		deriv.z = (Result.z - rot.z) * dtInv;
+		deriv.w = (Result.w - rot.w) * dtInv;
+		return new Quaternion(Result.x, Result.y, Result.z, Result.w);
+	}
+
     /// <summary>
     /// prints a list of keyframes, in a formsuitable for copy and pasting back to the code to recreate
     /// add a name for it to be present in the output
@@ -189,6 +230,23 @@ public static class zExtensions
         }
         return true;
     }
+    public static void saveJson(this object obj, string path)
+    {
+        string dataAsJson = JsonUtility.ToJson(obj);
+        File.WriteAllText(path, dataAsJson);
+        Debug.Log("saving as " + path);
+    }
+
+
+    public static T loadJson<T>(this T obj, string path)
+    {
+
+        string dataAsJson = File.ReadAllText(path);
+        obj = JsonUtility.FromJson<T>(dataAsJson);
+        return obj;
+        
+    }
+
 
     public static void AddLayoutElementFlexible(this GameObject g, bool flexible = true)
     {
@@ -201,9 +259,11 @@ public static class zExtensions
     }
     public static string ToShortString(this float f)
     {
-        return (Mathf.Round(f * 100) / 100).ToString();
-
+        return (f.ToString("F"));
+        //return (Mathf.Round(f * 100) / 100).ToString();
     }
+
+    [Obsolete("Use ToShortString instead")]
     public static string ToStringShort(this float f)
     {
         return (Mathf.Round(f * 100) / 100).ToString();
@@ -225,7 +285,19 @@ public static class zExtensions
         if (t == null) t = gameObject.AddComponent<T>();
         return t;
     }
+    public static string RandomString(int length)
+    {
+        const string pool = "abcdefghijklmnopqrstuvwxyz0123456789";
+        var builder = new StringBuilder();
 
+        for (var i = 0; i < length; i++)
+        {
+            var c = pool[UnityEngine.Random.Range(0, pool.Length - 1)];
+            builder.Append(c);
+        }
+
+        return builder.ToString();
+    }
 
     [System.Obsolete("use isActiveAndEnabled - i didn't know it existed")]
     public static bool disabled(this MonoBehaviour source)
@@ -342,25 +414,25 @@ public static class zExtensions
         texture.Apply();
 
     }
-/* 
-    #if UNITY_EDITOR
-public static void SetTextureImporterFormat( this Texture2D texture, bool isReadable)
-{
-    if ( null == texture ) return;
-
-    string assetPath = AssetDatabase.GetAssetPath( texture );
-    var tImporter = AssetImporter.GetAtPath( assetPath ) as TextureImporter;
-    if ( tImporter != null )
+    /* 
+        #if UNITY_EDITOR
+    public static void SetTextureImporterFormat( this Texture2D texture, bool isReadable)
     {
-        tImporter.textureType = TextureImporterType.Default;
+        if ( null == texture ) return;
 
-        tImporter.isReadable = isReadable;
+        string assetPath = AssetDatabase.GetAssetPath( texture );
+        var tImporter = AssetImporter.GetAtPath( assetPath ) as TextureImporter;
+        if ( tImporter != null )
+        {
+            tImporter.textureType = TextureImporterType.Default;
 
-        AssetDatabase.ImportAsset( assetPath );
-        AssetDatabase.Refresh();
+            tImporter.isReadable = isReadable;
+
+            AssetDatabase.ImportAsset( assetPath );
+            AssetDatabase.Refresh();
+        }
     }
-}
-    #endif*/
+        #endif*/
 }
 
 
