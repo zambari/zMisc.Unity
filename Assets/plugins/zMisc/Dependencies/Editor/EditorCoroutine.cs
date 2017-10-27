@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
-
+/*
 namespace Swing.Editor
 {
 	public class EditorCoroutine
@@ -35,11 +35,7 @@ namespace Swing.Editor
 
 		void update()
 		{
-			/* NOTE: no need to try/catch MoveNext,
-			 * if an IEnumerator throws its next iteration returns false.
-			 * Also, Unity probably catches when calling EditorApplication.update.
-			 */
-
+		
 			//Debug.Log("update");
 			if (!routine.MoveNext())
 			{
@@ -47,4 +43,4 @@ namespace Swing.Editor
 			}
 		}
 	}
-}
+}*/
