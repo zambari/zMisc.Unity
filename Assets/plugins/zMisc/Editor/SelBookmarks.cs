@@ -13,15 +13,17 @@ using UnityEditor;
  Editor window enabling you to remember and restore Hierarchy selections.
  Aslo searches for simiarily named objects within hierarchy (for example objects called Text).
  Theres also a shortcut for toggling the active state of bookmarked objects
+ version 1.03    (2017.10.30) removed 'b'  shortcut
  version 1.02  mutliple selections for active toggle now working   (2017.10.11)
  version 1.01    (2017.09.04)
+ 
 
 */
 
 
 public static class ObjectEnableToggle
 {
-    [MenuItem("Tools/Actions/Boomark  _b")]
+  /*  [MenuItem("Tools/Actions/Boomark  _b")]
     static void BookmarkSelected()
     {
         for (int i = 0; i < Selection.gameObjects.Length; i++)
@@ -30,7 +32,7 @@ public static class ObjectEnableToggle
             SelBookmarks.AddBookmark(Selection.activeGameObject);
         }
 
-    }
+    }*/
 
     [MenuItem("Tools/Actions/Toggle Enabled  _`")]
     static void toggleEnabled()
