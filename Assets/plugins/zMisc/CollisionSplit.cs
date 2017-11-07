@@ -36,8 +36,9 @@ public class CollisionSplit : MonoBehaviour
     {
         
       
-#if UNITY_EDITOR
+
         Rigidbody[] rbs = GetComponentsInChildren<Rigidbody>();
+#if UNITY_EDITOR
         for (int i = 1; i < rbs.Length; i++)
             Undo.DestroyObjectImmediate(rbs[i]);
 #else
