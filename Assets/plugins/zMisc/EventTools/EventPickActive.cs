@@ -7,6 +7,7 @@ public interface IAnimmateInOut
 {
     void animateIn();
     void animateOut();
+    bool isHidden();
 }
 public class EventPickActive : MonoBehaviour
 {
@@ -59,7 +60,11 @@ public class EventPickActive : MonoBehaviour
                         IAnimmateInOut animator = objects[i].GetComponent<IAnimmateInOut>();
 
                         if (animator != null)
-                            animator.animateOut();
+                        {
+                            if (!animator.isHidden())
+                                    animator.animateOut();
+
+                        }
                         else objects[i].SetActive(false);
                     }
                 }
