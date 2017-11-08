@@ -23,8 +23,9 @@ public class zEditorHelper : EditorWindow
     }
     static string[] tools = { "Components", "Layers", "Transform", "Text", "Misc", "Layout", "Config" };
     static string[] activeTools;
+    string activeTool;
     static bool[] toolsHidden;
-    Type[] listOfTypesToAdd = new Type[] { typeof(Rigidbody), typeof(BrownianMotionZ), typeof(RawImage), typeof(Image), typeof(MeshCollider), typeof(SphereCollider), typeof(BoxCollider) };
+    Type[] listOfTypesToAdd = new Type[] { typeof(LayoutElement), typeof(Rigidbody), typeof(BrownianMotionZ), typeof(RawImage), typeof(Image), typeof(MeshCollider), typeof(SphereCollider), typeof(BoxCollider) };
     float scaleSliderVal;
     Color defaultTextColor = Color.white;
 
@@ -33,8 +34,52 @@ public class zEditorHelper : EditorWindow
     GUIStyle thisStyle;
 
     static int screenNr;
+    void OnEnable()
+    {
+        SceneView.onSceneGUIDelegate += this.OnSceneGUI;
+    }
 
+    void OnDisable()
+    {
+        SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
+    }
+    void OnSceneGUI(SceneView sceneView)
+    {
+        if (activeTool != "Layout") return;
+        if (Selection.activeGameObject == null) return;
+        if (SceneView.lastActiveSceneView != null)
+        {
+            LayoutElement layoutElement = Selection.activeGameObject.GetComponent<LayoutElement>();
+            if (layoutElement == null) return;
+       //     RectTransform rect = Selection.activeGameObject.GetComponent<RectTransform>();
+        //    Vector3[] corners = new Vector3[4];
+         //   rect.GetWorldCorners(corners);
 
+     float handleSize=50;
+     float valueDivide=200;
+            if (layoutElement.GetComponentInParent<HorizontalLayoutGroup>()!=null&& layoutElement.preferredWidth >0)
+            {
+                float newVal = Handles.ScaleSlider(layoutElement.preferredWidth, layoutElement.transform.position/*& (corners[2] + corners[3]) / 2*/, Vector3.right, Quaternion.identity, 50+ layoutElement.preferredWidth /3, 0);
+                float delta = newVal - layoutElement.preferredWidth;
+                if (delta != 0) delta /= valueDivide;
+                if (delta>0||    layoutElement.preferredWidth>10)
+                layoutElement.preferredWidth += delta;
+            }
+
+            if (layoutElement.GetComponentInParent<VerticalLayoutGroup>()!=null&& layoutElement.preferredHeight >0)
+            {
+                float newVal = Handles.ScaleSlider(layoutElement.preferredHeight,layoutElement.transform.position, -Vector3.up, Quaternion.identity,50+ layoutElement.preferredHeight /3, 0);
+             //           float newVal = Handles.ScaleSlider(layoutElement.preferredHeight, (corners[3] + corners[0]) / 2, -Vector3.up, Quaternion.identity, handleSize, 0);
+                float delta = newVal - layoutElement.preferredHeight;
+                if (delta != 0) { delta /= valueDivide;
+                if (delta>0||    layoutElement.preferredHeight>10)
+                layoutElement.preferredHeight += delta;
+                }
+              
+            }
+         
+        }
+    }
 
     void OnGUI()
     {
@@ -44,14 +89,14 @@ public class zEditorHelper : EditorWindow
         thisStyle = EditorStyles.miniButton;
         screenNr = GUILayout.Toolbar(screenNr, activeTools);
         GUILayout.Space(6);
-        string thisTool = activeTools[screenNr];
-        if (thisTool == "Layers") drawTagger();
-        if (thisTool == "Transform") drawTransform();
-        if (thisTool == "Misc") drawMisc();
-        if (thisTool == "Text") drawTexts();
-        if (thisTool == "Components") drawComponents();
-        if (thisTool == "Config") drawConfig();
-        if (thisTool == "Layout") drawLayout();
+        activeTool = activeTools[screenNr];
+        if (activeTool == "Layers") drawTagger();
+        if (activeTool == "Transform") drawTransform();
+        if (activeTool == "Misc") drawMisc();
+        if (activeTool == "Text") drawTexts();
+        if (activeTool == "Components") drawComponents();
+        if (activeTool == "Config") drawConfig();
+        if (activeTool == "Layout") drawLayout();
     }
     RectTransform createChild(string name)
     {
@@ -85,11 +130,16 @@ public class zEditorHelper : EditorWindow
     {
         if (nothingSelected) return;
 
+
+
         if (Selection.objects.Length > 1)
         {
             GUILayout.Label("please select only one obejct");
             return;
         }
+        GUILayout.Label("ParentLayout");
+        if (Selection.activeGameObject.transform.parent != null)
+            switchLayout(Selection.activeGameObject.transform.parent.gameObject);
 
         if (GUILayout.Button("create panel"))
         {
@@ -101,12 +151,21 @@ public class zEditorHelper : EditorWindow
 
             Selection.activeGameObject = createText();
         }
-        int hasLayout = 0;
-        float spacing = 0;
-        RectOffset rectOffset = new RectOffset();
-        HorizontalLayoutGroup horiz = Selection.activeGameObject.GetComponent<HorizontalLayoutGroup>();
-        VerticalLayoutGroup vert = Selection.activeGameObject.GetComponent<VerticalLayoutGroup>();
+        GUILayout.Label("Sub Layout");
+        switchLayout(Selection.activeGameObject);
+        
 
+    }
+
+
+    void switchLayout(GameObject gameObject)
+    {
+        Undo.RecordObject(gameObject,"Layout");
+        HorizontalLayoutGroup horiz = gameObject.GetComponent<HorizontalLayoutGroup>();
+        VerticalLayoutGroup vert = gameObject.GetComponent<VerticalLayoutGroup>();
+        float spacing = 5;
+        int hasLayout = 0;
+        RectOffset rectOffset = new RectOffset();
         if (horiz != null)
         {
             hasLayout = 1;
@@ -119,7 +178,7 @@ public class zEditorHelper : EditorWindow
             rectOffset = vert.padding;
             spacing = vert.spacing;
         }
-        GUILayout.Label("AutoLayout");
+
         int newLayout = GUILayout.Toolbar(hasLayout, layouts);
         if (hasLayout != newLayout)
         {
@@ -132,33 +191,33 @@ public class zEditorHelper : EditorWindow
             }
             if (newLayout == 1)
             {
-                HorizontalLayoutGroup hg = Selection.activeGameObject.AddComponent<HorizontalLayoutGroup>();
+                HorizontalLayoutGroup hg = gameObject.AddComponent<HorizontalLayoutGroup>();
                 hg.padding = rectOffset;
                 hg.spacing = spacing;
                 hg.childForceExpandHeight = false;
                 hg.childForceExpandWidth = false;
                 hg.childControlHeight = true;
                 hg.childControlWidth = true;
-                addLayoutElenments();
+                addLayoutElenments(gameObject);
             }
             if (newLayout == 2)
             {
-                VerticalLayoutGroup vg = Selection.activeGameObject.AddComponent<VerticalLayoutGroup>();
+                VerticalLayoutGroup vg = gameObject.AddComponent<VerticalLayoutGroup>();
                 vg.padding = rectOffset;
                 vg.spacing = spacing;
                 vg.childForceExpandHeight = false;
                 vg.childForceExpandWidth = false;
                 vg.childControlHeight = true;
                 vg.childControlWidth = true;
-                addLayoutElenments();
+                addLayoutElenments(gameObject);
             }
         }
 
     }
 
-    void addLayoutElenments()
+    void addLayoutElenments(GameObject gameObject)
     {
-        Transform active = Selection.activeGameObject.transform;
+        Transform active = gameObject.transform;
         for (int i = 0; i < active.childCount; i++)
         {
             GameObject thisChild = active.GetChild(i).gameObject;
@@ -184,7 +243,7 @@ public class zEditorHelper : EditorWindow
         {
             toolsHidden = new bool[tools.Length];
             for (int i = 0; i < toolsHidden.Length; i++)
-                toolsHidden[i]=PlayerPrefs.GetInt("zEditorTool_"+i,0)==1;
+                toolsHidden[i] = PlayerPrefs.GetInt("zEditorTool_" + tools[i], 0) == 1;
         }
 
 
@@ -200,7 +259,7 @@ public class zEditorHelper : EditorWindow
         activeTools = newToolList.ToArray();
         screenNr = activeTools.Length - 1;
         for (int i = 0; i < toolsHidden.Length; i++)
-              PlayerPrefs.SetInt("zEditorTool_"+i,  (toolsHidden[i]?0:1));
+            PlayerPrefs.SetInt("zEditorTool_" + tools[i], (toolsHidden[i] ? 1 : 0));
     }
 
     void drawConfig()
