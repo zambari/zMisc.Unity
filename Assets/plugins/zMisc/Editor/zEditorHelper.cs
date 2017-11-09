@@ -5,10 +5,10 @@ using UnityEngine.UI;
 using UnityEditor;
 using System;
 using System.IO;
-
+using UnityEngine.EventSystems;
 
 /// Zambari 2017
-/// v.1.04
+/// v.1.05
 /// 
 
 public class zEditorHelper : EditorWindow
@@ -22,23 +22,33 @@ public class zEditorHelper : EditorWindow
 
     }
     static string[] tools = { "Components", "Layers", "Transform", "Text", "Misc", "Layout", "Config" };
+    static string[] bgColors = { "SkyBox", "Black", "Bluish", "Random", "White" };
     static string[] activeTools;
     string activeTool;
     static bool[] toolsHidden;
     Type[] listOfTypesToAdd = new Type[] { typeof(LayoutElement), typeof(Rigidbody), typeof(BrownianMotionZ), typeof(RawImage), typeof(Image), typeof(MeshCollider), typeof(SphereCollider), typeof(BoxCollider) };
     float scaleSliderVal;
     Color defaultTextColor = Color.white;
-
     string[] layouts = { "None", "Horizontal", "Vertical" };
-
     GUIStyle thisStyle;
-
-    static int screenNr;
+    bool showParentLayout;
+   static int _screenNr;
+    static int screenNr { get {return _screenNr; }
+    set {
+        if (_screenNr!=value) PlayerPrefs.SetInt("zEditorTool_lastTool",value);
+        _screenNr=value;
+    }}
+        bool objectIsSelected { get { return Selection.activeGameObject != null; } }
+    GameObject selObj
+    {
+        get { return Selection.activeGameObject; }
+        set { Selection.activeGameObject = value; ; }
+    }
     void OnEnable()
     {
+        screenNr= PlayerPrefs.GetInt("zEditorTool_lastTool",0);
         SceneView.onSceneGUIDelegate += this.OnSceneGUI;
     }
-
     void OnDisable()
     {
         SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
@@ -46,49 +56,45 @@ public class zEditorHelper : EditorWindow
     void OnSceneGUI(SceneView sceneView)
     {
         if (activeTool != "Layout") return;
-        if (Selection.activeGameObject == null) return;
+        if (selObj == null) return;
         if (SceneView.lastActiveSceneView != null)
         {
-            LayoutElement layoutElement = Selection.activeGameObject.GetComponent<LayoutElement>();
+            LayoutElement layoutElement = selObj.GetComponent<LayoutElement>();
             if (layoutElement == null) return;
-       //     RectTransform rect = Selection.activeGameObject.GetComponent<RectTransform>();
-        //    Vector3[] corners = new Vector3[4];
-         //   rect.GetWorldCorners(corners);
-
-     float handleSize=50;
-     float valueDivide=200;
-            if (layoutElement.GetComponentInParent<HorizontalLayoutGroup>()!=null&& layoutElement.preferredWidth >0)
+            float valueDivide = 200;
+            if (layoutElement.GetComponentInParent<HorizontalLayoutGroup>() != null && layoutElement.preferredWidth > 0)
             {
-                float newVal = Handles.ScaleSlider(layoutElement.preferredWidth, layoutElement.transform.position/*& (corners[2] + corners[3]) / 2*/, Vector3.right, Quaternion.identity, 50+ layoutElement.preferredWidth /3, 0);
+                float newVal = Handles.ScaleSlider(layoutElement.preferredWidth, layoutElement.transform.position/*& (corners[2] + corners[3]) / 2*/, Vector3.right, Quaternion.identity, 50 + layoutElement.preferredWidth / 3, 0);
                 float delta = newVal - layoutElement.preferredWidth;
                 if (delta != 0) delta /= valueDivide;
-                if (delta>0||    layoutElement.preferredWidth>10)
-                layoutElement.preferredWidth += delta;
+                if (delta > 0 || layoutElement.preferredWidth > 10)
+                    layoutElement.preferredWidth += delta;
+            }
+            if (layoutElement.GetComponentInParent<VerticalLayoutGroup>() != null && layoutElement.preferredHeight > 0)
+            {
+                float newVal = Handles.ScaleSlider(layoutElement.preferredHeight, layoutElement.transform.position, -Vector3.up, Quaternion.identity, 50 + layoutElement.preferredHeight / 3, 0);
+                //           float newVal = Handles.ScaleSlider(layoutElement.preferredHeight, (corners[3] + corners[0]) / 2, -Vector3.up, Quaternion.identity, handleSize, 0);
+                float delta = newVal - layoutElement.preferredHeight;
+                if (delta != 0)
+                {
+                    delta /= valueDivide;
+                    if (delta > 0 || layoutElement.preferredHeight > 10)
+                        layoutElement.preferredHeight += delta;
+                }
+
             }
 
-            if (layoutElement.GetComponentInParent<VerticalLayoutGroup>()!=null&& layoutElement.preferredHeight >0)
-            {
-                float newVal = Handles.ScaleSlider(layoutElement.preferredHeight,layoutElement.transform.position, -Vector3.up, Quaternion.identity,50+ layoutElement.preferredHeight /3, 0);
-             //           float newVal = Handles.ScaleSlider(layoutElement.preferredHeight, (corners[3] + corners[0]) / 2, -Vector3.up, Quaternion.identity, handleSize, 0);
-                float delta = newVal - layoutElement.preferredHeight;
-                if (delta != 0) { delta /= valueDivide;
-                if (delta>0||    layoutElement.preferredHeight>10)
-                layoutElement.preferredHeight += delta;
-                }
-              
-            }
-         
         }
     }
 
     void OnGUI()
     {
         if (toolsHidden == null) rebuldTools();
-
         GUILayout.Space(6);
         thisStyle = EditorStyles.miniButton;
         screenNr = GUILayout.Toolbar(screenNr, activeTools);
         GUILayout.Space(6);
+        if (screenNr>=activeTools.Length) screenNr=activeTools.Length-1;
         activeTool = activeTools[screenNr];
         if (activeTool == "Layers") drawTagger();
         if (activeTool == "Transform") drawTransform();
@@ -98,25 +104,88 @@ public class zEditorHelper : EditorWindow
         if (activeTool == "Config") drawConfig();
         if (activeTool == "Layout") drawLayout();
     }
-    RectTransform createChild(string name)
+    RectTransform createChild(string name, Transform parent = null)
     {
         GameObject gameObject = new GameObject(name);
         Undo.RegisterCreatedObjectUndo(gameObject, "Created " + name);
         RectTransform rect = gameObject.AddComponent<RectTransform>();
-        gameObject.transform.SetParent(Selection.activeGameObject.transform);
+        if (parent != null)
+            gameObject.transform.SetParent(parent);
+        else
+        if (objectIsSelected)
+            gameObject.transform.SetParent(selObj.transform);
         gameObject.transform.localPosition = Vector3.zero;
         return rect;
     }
-    GameObject createPanel()
+
+    T createObjectWithComponent<T>(string name) where T : Component
     {
-        GameObject gameObject = createChild("Panel").gameObject;
+        return createChild(name).gameObject.AddComponent<T>();
+    }
+
+    Transform getCanvasTransform()
+    {
+        Canvas c = GameObject.FindObjectOfType<Canvas>();
+        if (c == null)
+        {
+            c = createObjectWithComponent<Canvas>("Canvas");
+            c.renderMode = RenderMode.ScreenSpaceOverlay;
+            CanvasScaler cs = c.gameObject.AddComponent<CanvasScaler>();
+            cs.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            cs.referenceResolution = new Vector2(1920, 1080);
+            c.gameObject.AddComponent<GraphicRaycaster>();
+            EventSystem e = createObjectWithComponent<EventSystem>("EventSystem");
+            e.gameObject.AddComponent<StandaloneInputModule>();
+            c.transform.SetParent(null);
+        }
+        return c.transform;
+    }
+
+    Transform GetUIParent()
+    {
+        if (objectIsSelected)
+            return selObj.transform;
+        else
+            return getCanvasTransform().transform;
+    }
+    GameObject createPanel(bool filling=false)
+    {
+
+        GameObject gameObject = createChild("Panel", GetUIParent()).gameObject;
+
         Image i = gameObject.AddComponent<Image>();
-        i.color = Color.black * 0.5f;
+        i.color = Color.black * 0.5f+(new Color(UnityEngine.Random.value,UnityEngine.Random.value,UnityEngine.Random.value))*0.2f;
+        if (filling)
+        {
+            RectTransform r=gameObject.GetComponent<RectTransform>();
+            r.localScale=Vector2.one;
+            r.anchorMin=Vector2.zero;
+            r.anchorMax=Vector2.one;
+            r.offsetMax=Vector2.zero;
+            r.offsetMin=Vector2.zero;
+        }
         return gameObject;
+    }
+
+    void drawCameraBg()
+    {
+        if (Camera.main==null) return;
+        Color current = Camera.main.backgroundColor;
+        GUILayout.BeginHorizontal();
+        bool isSOlid = Camera.main.clearFlags == CameraClearFlags.SolidColor;
+        if (GUILayout.Toggle(isSOlid, "Camera background solid"))
+        {
+            Camera.main.clearFlags = CameraClearFlags.SolidColor;
+            Camera.main.backgroundColor = EditorGUILayout.ColorField(Camera.main.backgroundColor);
+        }
+        else
+            Camera.main.clearFlags = CameraClearFlags.Skybox;
+
+        GUILayout.EndHorizontal();
     }
     GameObject createText()
     {
-        RectTransform rect = createChild("Text");
+        RectTransform rect = createChild("Text", GetUIParent());
         rect.anchorMin = Vector2.zero;
         rect.anchorMax = Vector2.one;
         rect.offsetMax = Vector2.zero;
@@ -126,41 +195,83 @@ public class zEditorHelper : EditorWindow
         text.color = defaultTextColor;
         return rect.gameObject;
     }
+
+    void drawImageColorHelper()
+    {
+        if (selObj==null) return;
+        Image image=selObj.GetComponent<Image>();
+        if (image==null) return;
+          GUILayout.BeginHorizontal(); 
+    
+                            image.color = EditorGUILayout.ColorField(image.color);
+                            float a=image.color.a;
+                            if (GUILayout.Button("black")) image.color=Color.black*a;
+                            if (GUILayout.Button("white")) image.color=Color.white*a;
+                           if (GUILayout.Button("red")) image.color=Color.red*a;
+                           if (GUILayout.Button("green")) image.color=Color.green*a;
+                           if (GUILayout.Button("blue")) image.color=Color.blue*a;
+        
+        float newA=GUILayout.HorizontalSlider(a,0,1);
+        if (newA!=a) image.color=new Color(image.color.r,image.color.g,image.color.b,newA);
+       GUILayout.EndHorizontal();
+    }
+
+    void createParentPanel()
+    {
+         RectTransform rect= createPanel(true).GetComponent<RectTransform>();
+         Vector2 size=rect.sizeDelta;
+         Debug.Log(size);
+         size=new Vector2(rect.rect.width,rect.rect.height);
+         rect.anchorMin=Vector2.one/2;
+         rect.anchorMax=rect.anchorMin;
+         rect.sizeDelta=size;
+         rect.localScale=Vector3.one;
+         rect.position=selObj.transform.position;
+         rect.SetParent(selObj.transform.parent);
+         rect.SetSiblingIndex(selObj.transform.GetSiblingIndex());
+         LayoutElement le=rect.gameObject.AddComponent<LayoutElement>();
+         le.preferredHeight=rect.rect.height;
+         le.preferredWidth=rect.rect.width;
+         rect.gameObject.GetComponent<Image>().enabled=false;
+         rect.name="Parented "+selObj.name;
+         Undo.RecordObject(selObj,"object moved");
+         selObj.transform.SetParent(rect);
+         selObj=rect.gameObject;
+    }
     void drawLayout()
     {
-        if (nothingSelected) return;
-
-
-
+        drawCameraBg();
         if (Selection.objects.Length > 1)
         {
             GUILayout.Label("please select only one obejct");
             return;
         }
-        GUILayout.Label("ParentLayout");
-        if (Selection.activeGameObject.transform.parent != null)
-            switchLayout(Selection.activeGameObject.transform.parent.gameObject);
 
-        if (GUILayout.Button("create panel"))
+        if (showParentLayout)
+        if (selObj != null && selObj.transform.parent != null)
         {
-
-            Selection.activeGameObject = createPanel();
+            GUILayout.Label("ParentLayout");
+            switchLayout(selObj.transform.parent.gameObject);
         }
-        if (GUILayout.Button("create Text"))
-        {
-
-            Selection.activeGameObject = createText();
-        }
-        GUILayout.Label("Sub Layout");
-        switchLayout(Selection.activeGameObject);
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("create panel")) selObj = createPanel(false);
+        if (GUILayout.Button("filling panel")) selObj = createPanel(true);
+        if (selObj!=null) if (GUILayout.Button("Parent panel")) createParentPanel();
+        GUILayout.EndHorizontal();
         
+        if (GUILayout.Button("create Text")) selObj = createText();
 
+        if (selObj != null)
+        {
+            GUILayout.Label("Sub Layout");
+            switchLayout(selObj);
+        }
+         drawImageColorHelper();
     }
-
 
     void switchLayout(GameObject gameObject)
     {
-        Undo.RecordObject(gameObject,"Layout");
+        Undo.RecordObject(gameObject, "Layout");
         HorizontalLayoutGroup horiz = gameObject.GetComponent<HorizontalLayoutGroup>();
         VerticalLayoutGroup vert = gameObject.GetComponent<VerticalLayoutGroup>();
         float spacing = 5;
@@ -184,11 +295,7 @@ public class zEditorHelper : EditorWindow
         {
             if (horiz != null) DestroyImmediate(horiz);
             if (vert != null) DestroyImmediate(vert);
-            if (newLayout == 0)
-            {
-
-                return;
-            }
+            if (newLayout == 0)            return;
             if (newLayout == 1)
             {
                 HorizontalLayoutGroup hg = gameObject.AddComponent<HorizontalLayoutGroup>();
@@ -212,7 +319,6 @@ public class zEditorHelper : EditorWindow
                 addLayoutElenments(gameObject);
             }
         }
-
     }
 
     void addLayoutElenments(GameObject gameObject)
@@ -228,42 +334,31 @@ public class zEditorHelper : EditorWindow
                 RectTransform rect = thisChild.GetComponent<RectTransform>();
                 layoutElement.preferredWidth = rect.rect.width;
                 layoutElement.preferredHeight = rect.rect.height;
-
             }
         }
-
-
-
     }
 
-    bool nothingSelected { get { if (Selection.activeGameObject == null) { GUILayout.Label("nothing selected"); return true; } return false; } }
+    bool nothingSelected { get { if (selObj == null) { GUILayout.Label("nothing selected"); return true; } return false; } }
     static void rebuldTools()
     {
-        if (toolsHidden == null)
+       if (toolsHidden == null)
         {
             toolsHidden = new bool[tools.Length];
             for (int i = 0; i < toolsHidden.Length; i++)
                 toolsHidden[i] = PlayerPrefs.GetInt("zEditorTool_" + tools[i], 0) == 1;
         }
-
-
         List<string> newToolList = new List<string>();
         for (int i = 0; i < tools.Length - 1; i++)
-        {
             if (!toolsHidden[i]) newToolList.Add(tools[i]);
-        }
-        for (int i = 0; i < tools.Length - 1; i++)
-        {
-        }
         newToolList.Add(tools[tools.Length - 1]);
         activeTools = newToolList.ToArray();
-        screenNr = activeTools.Length - 1;
         for (int i = 0; i < toolsHidden.Length; i++)
             PlayerPrefs.SetInt("zEditorTool_" + tools[i], (toolsHidden[i] ? 1 : 0));
     }
 
     void drawConfig()
     {
+        GUILayout.Space(10);
         for (int i = 0; i < tools.Length - 1; i++)
         {
             bool newVal = !GUILayout.Toggle(!toolsHidden[i], tools[i]);
@@ -273,28 +368,15 @@ public class zEditorHelper : EditorWindow
                 rebuldTools();
             }
         }
+        GUILayout.Space(10);
+        showParentLayout= GUILayout.Toggle(showParentLayout,"Show Parent Auto Layout");
     }
-    void drawTexts()
-    {
-        if (nothingSelected) return;
-        performOnComponents<Text>(textChange, true);
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("makeWhite"))
-            performOnComponents<Text>((Text t) => t.color = Color.white, true);
-        if (GUILayout.Button("makeBlack"))
-            performOnComponents<Text>((Text t) => t.color = Color.black, true);
-        GUILayout.EndHorizontal();
 
-    }
-    void textChange(Text t)
-    {
-        string currentText = t.text;
-        string newText = GUILayout.TextArea(currentText);
-        if (currentText == newText) return;
-        t.text = newText;
-        EditorGUIUtility.PingObject(t);
 
-    }
+
+    /// <summary>
+    /// Returns all the components of given type within selected gameObject (and their children with optional flag)
+    /// </summary>
     void performOnComponents<T>(Action<T> actionToPerform, bool children = false) where T : Component
     {
         for (int i = 0; i < Selection.gameObjects.Length; i++)
@@ -315,6 +397,28 @@ public class zEditorHelper : EditorWindow
                 }
             }
         }
+    }
+    void drawTexts()
+    {
+        if (nothingSelected) return;
+        performOnComponents<Text>(textChange, true);
+        GUILayout.BeginHorizontal();
+        if (selObj.GetComponentInChildren<Text>() != null)
+        {
+            if (GUILayout.Button("makeWhite"))
+                performOnComponents<Text>((Text t) => t.color = Color.white, true);
+            if (GUILayout.Button("makeBlack"))
+                performOnComponents<Text>((Text t) => t.color = Color.black, true);
+        }
+        GUILayout.EndHorizontal();
+    }
+    void textChange(Text t)
+    {
+        string currentText = t.text;
+        string newText = GUILayout.TextArea(currentText);
+        if (currentText == newText) return;
+        t.text = newText;
+        EditorGUIUtility.PingObject(t);
     }
 
     bool applyToChildren;
@@ -346,9 +450,7 @@ public class zEditorHelper : EditorWindow
     }
     void drawComponentEditRemove()
     {
-        Component[] components = Selection.activeGameObject.GetComponents<Component>();
-        //    if (components == null)
-        //      return;
+        Component[] components = selObj.GetComponents<Component>();
         EditorGUILayout.BeginVertical();
         {
             EditorGUILayout.BeginHorizontal();
@@ -358,7 +460,6 @@ public class zEditorHelper : EditorWindow
                 collapseComponents(false);
             EditorGUILayout.EndHorizontal();
             GUILayout.Label("Edit/Remove");
-
             for (int i = 1; i < components.Length; i++)
             {
                 EditorGUILayout.BeginHorizontal();
@@ -426,8 +527,8 @@ public class zEditorHelper : EditorWindow
 
     void OnSelectionChange()
     {
-        if (Selection.activeGameObject != null)
-            scaleSliderVal = Selection.activeGameObject.transform.localScale.x;
+        if (selObj != null)
+            scaleSliderVal = selObj.transform.localScale.x;
         Repaint();
     }
     void drawTransform()
@@ -435,114 +536,102 @@ public class zEditorHelper : EditorWindow
         if (nothingSelected) return;
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("Reset Local Position"))
-            Selection.activeGameObject.transform.localPosition = Vector3.zero;
+            selObj.transform.localPosition = Vector3.zero;
         if (GUILayout.Button("Reset Global Position"))
-            Selection.activeGameObject.transform.position = Vector3.zero;
+            selObj.transform.position = Vector3.zero;
 
         EditorGUILayout.EndHorizontal();
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("Reset Local Rotation"))
-            Selection.activeGameObject.transform.localRotation = Quaternion.identity;
+            selObj.transform.localRotation = Quaternion.identity;
         if (GUILayout.Button("Reset Global Rotation"))
-            Selection.activeGameObject.transform.rotation = Quaternion.identity;
+            selObj.transform.rotation = Quaternion.identity;
 
         EditorGUILayout.EndHorizontal();
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("Reset Scale"))
-            Selection.activeGameObject.transform.localScale = Vector3.one;
+            selObj.transform.localScale = Vector3.one;
         EditorGUILayout.EndHorizontal();
-        Vector3 currentScale = Selection.activeGameObject.transform.localScale;
+        Vector3 currentScale = selObj.transform.localScale;
         if (currentScale.x == currentScale.y && currentScale.y == currentScale.z)
             scaleSliderVal = GUILayout.HorizontalSlider(currentScale.x, 0.001f, 2);
-        if (scaleSliderVal != currentScale.x) Selection.activeGameObject.transform.localScale = new Vector3(scaleSliderVal, scaleSliderVal, scaleSliderVal);
+        if (scaleSliderVal != currentScale.x) selObj.transform.localScale = new Vector3(scaleSliderVal, scaleSliderVal, scaleSliderVal);
         drawflipAxis();
     }
     void drawflipAxis()
     {
         EditorGUILayout.BeginHorizontal();
-        Vector3 cur = Selection.activeGameObject.transform.eulerAngles;
+        Vector3 cur = selObj.transform.eulerAngles;
         if (GUILayout.Button("x +"))
-            Selection.activeGameObject.transform.localEulerAngles = new Vector3(Mathf.Round(cur.x + 90), cur.y, cur.z);
+            selObj.transform.localEulerAngles = new Vector3(Mathf.Round(cur.x + 90), cur.y, cur.z);
         if (GUILayout.Button("x -"))
-            Selection.activeGameObject.transform.localEulerAngles = new Vector3(Mathf.Round(cur.x - 90), cur.y, cur.z);
+            selObj.transform.localEulerAngles = new Vector3(Mathf.Round(cur.x - 90), cur.y, cur.z);
         if (GUILayout.Button("y +"))
-            Selection.activeGameObject.transform.localEulerAngles = new Vector3(cur.x, Mathf.Round(cur.y + 90), cur.z);
+            selObj.transform.localEulerAngles = new Vector3(cur.x, Mathf.Round(cur.y + 90), cur.z);
         if (GUILayout.Button("y +"))
-            Selection.activeGameObject.transform.localEulerAngles = new Vector3(cur.x, Mathf.Round(cur.y - 90), cur.z);
+            selObj.transform.localEulerAngles = new Vector3(cur.x, Mathf.Round(cur.y - 90), cur.z);
         if (GUILayout.Button("z +"))
-            Selection.activeGameObject.transform.localEulerAngles = new Vector3(cur.x, cur.y, Mathf.Round(cur.z + 90));
+            selObj.transform.localEulerAngles = new Vector3(cur.x, cur.y, Mathf.Round(cur.z + 90));
         if (GUILayout.Button("z -"))
-            Selection.activeGameObject.transform.localEulerAngles = new Vector3(cur.x, cur.y, Mathf.Round(cur.z - 90));
+            selObj.transform.localEulerAngles = new Vector3(cur.x, cur.y, Mathf.Round(cur.z - 90));
         EditorGUILayout.EndHorizontal();
         EditorGUILayout.BeginHorizontal();
 
         if (GUILayout.Button("A"))
         {
-            Selection.activeGameObject.transform.position = new Vector3(0, 0, 0);
-            Selection.activeGameObject.transform.eulerAngles = new Vector3(-45, 0, 0);
-
+            selObj.transform.position = new Vector3(0, 0, 0);
+            selObj.transform.eulerAngles = new Vector3(-45, 0, 0);
         }
 
         if (GUILayout.Button("B"))
         {
-            Selection.activeGameObject.transform.position = new Vector3(0, 0, 0);
-            Selection.activeGameObject.transform.eulerAngles = new Vector3(-45, -90, 0);
-
+            selObj.transform.position = new Vector3(0, 0, 0);
+            selObj.transform.eulerAngles = new Vector3(-45, -90, 0);
         }
         if (GUILayout.Button("A front"))
         {
-            Selection.activeGameObject.transform.position = new Vector3(0, -0.8f, -2);
-            Selection.activeGameObject.transform.eulerAngles = new Vector3(0, 0, 0);
-
+            selObj.transform.position = new Vector3(0, -0.8f, -2);
+            selObj.transform.eulerAngles = new Vector3(0, 0, 0);
         }
         if (GUILayout.Button("B Front"))
         {
-            Selection.activeGameObject.transform.position = new Vector3(2, -0.8f, 0);
-            Selection.activeGameObject.transform.eulerAngles = new Vector3(0, -90, 0);
-
+            selObj.transform.position = new Vector3(2, -0.8f, 0);
+            selObj.transform.eulerAngles = new Vector3(0, -90, 0);
         }
         if (GUILayout.Button("Reset"))
         {
-            Selection.activeGameObject.transform.position = new Vector3(0, 0, 0);
-            Selection.activeGameObject.transform.eulerAngles = new Vector3(0, 0, 0);
-
+            selObj.transform.position = new Vector3(0, 0, 0);
+            selObj.transform.eulerAngles = new Vector3(0, 0, 0);
         }
         EditorGUILayout.EndHorizontal();
     }
     GameObject handleParentSelectionContext(GameObject newGo)
     {
         Undo.RegisterCreatedObjectUndo(newGo, "created via helper");
-        if (Selection.activeGameObject != null)
+        if (selObj != null)
         {
-            newGo.transform.SetParent(Selection.activeGameObject.transform);
+            newGo.transform.SetParent(selObj.transform);
             newGo.transform.position = Vector3.zero;
             newGo.transform.rotation = Quaternion.identity;
         }
-        Selection.activeGameObject = newGo;
+        selObj = newGo;
         return newGo;
     }
 
-
     void setTags(string tag)
     {
-
         if (applyToChildren)
-        {
             for (int i = 0; i < Selection.gameObjects.Length; i++)
-            {
                 Selection.gameObjects[i].tag = tag;
-            }
-        }
         else
-            Selection.activeGameObject.tag = tag;
+            selObj.tag = tag;
     }
     public static string[] tags = { "None", "Layer0", "Layer1", "Layer2", "Layer3" };
     void drawTagger()
     {
-
         applyToChildren = GUILayout.Toggle(applyToChildren, "Apply to children");
         if (nothingSelected) return;
-        string currentTag = Selection.activeGameObject.tag;
+        string currentTag = selObj.tag;
         for (int i = 0; i < tags.Length; i++)
         {
             if (tags[i] == currentTag)
@@ -551,20 +640,45 @@ public class zEditorHelper : EditorWindow
                     setTags(tags[i]);
             }
             else
-            {
                 if (GUILayout.Button(tags[i])) setTags(tags[i]);
-            }
+        }
+    }
+    /*
+
+        void dumpObject(GameObject source)
+        {
+               RectTransform s=selObj.GetComponent<RectTransform>();
+               System.Text.StringBuilder sb =new System.Text.StringBuilder();
+
+               GameObject gameObject=new GameObject(selObj.name+"s");
+               sb.Append("GameObject gameObject=new GameObject(\""); sb.Append(selObj.name); sb.Append("\"");
+               RectTransform rect=gameObject.AddComponent<RectTransform>();
+               rect.SetParent(selObj.transform.parent);       
+               rect.localScale=new Vector3(s.localScale.x,s.localScale.y,s.localScale.z);
+               rect.anchorMin=new Vector2(s.anchorMin.x,s.anchorMin.y);
+               rect.anchorMax=new Vector2(s.anchorMax.x,s.anchorMax.y);
+               rect.offsetMin=new Vector2(s.offsetMin.x,s.offsetMin.y);
+               rect.offsetMax=new Vector2(s.offsetMax.x,s.offsetMax.y);
+               rect.position=new Vector3(s.position.x,s.position.y,s.position.z);
+                Debug.Log(sb.ToString());
         }
 
-    }
+
+           void dumpStructure()
+           {
+               string dump="";
+
+
+
+           }*/
     void drawMisc()
     {
         GUILayout.BeginHorizontal();
-        if (Selection.activeGameObject != null)
-            if (GUILayout.Button("Parent " + Selection.activeGameObject.name))
+        if (selObj != null)
+            if (GUILayout.Button("Parent " + selObj.name))
             {
-                Transform sel = Selection.activeGameObject.transform;
-                GameObject newGO = new GameObject("Parent " + Selection.activeGameObject.name);
+                Transform sel = selObj.transform;
+                GameObject newGO = new GameObject("Parent " + selObj.name);
                 if (sel.parent != null)
                     newGO.transform.SetParent(sel.parent);
 
@@ -575,15 +689,15 @@ public class zEditorHelper : EditorWindow
             }
         if (GUILayout.Button("Create Child"))
             handleParentSelectionContext(new GameObject("gameobject"));
-        if (Selection.activeGameObject != null && GUILayout.Button("as sibling"))
+        if (selObj != null && GUILayout.Button("as sibling"))
         {
             GameObject newGo = new GameObject("gameobject");
             Undo.RegisterCreatedObjectUndo(newGo, "created via helper");
-            newGo.transform.SetParent(Selection.activeGameObject.transform.parent);
-            newGo.transform.position = Selection.activeGameObject.transform.position;
-            newGo.transform.rotation = Selection.activeGameObject.transform.rotation;
-            newGo.transform.SetSiblingIndex(Selection.activeGameObject.transform.GetSiblingIndex() + 1);
-            Selection.activeGameObject = newGo;
+            newGo.transform.SetParent(selObj.transform.parent);
+            newGo.transform.position = selObj.transform.position;
+            newGo.transform.rotation = selObj.transform.rotation;
+            newGo.transform.SetSiblingIndex(selObj.transform.GetSiblingIndex() + 1);
+            selObj = newGo;
         }
 
         GUILayout.EndHorizontal();
@@ -601,6 +715,13 @@ public class zEditorHelper : EditorWindow
         GUILayout.EndHorizontal();
 
         drawCloner();
+        /*   GUILayout.BeginHorizontal();
+
+           if (selObj!=null && GUILayout.Button("DumpStructureToConsole"))
+               dumpStructure();
+
+           GUILayout.EndHorizontal();*/
+
         GUILayout.FlexibleSpace();
         if (GUILayout.Button("edit helper"))
             EditHelperCode();
@@ -617,7 +738,7 @@ public class zEditorHelper : EditorWindow
             Transform group = (new GameObject("Group")).transform;
             for (int i = 0; i < 10; i++)
             {
-                GameObject newGo = Instantiate(Selection.activeGameObject);
+                GameObject newGo = Instantiate(selObj);
                 newGo.transform.position += (new Vector3(0.5f - UnityEngine.Random.value, 1 * i, 0.5f - UnityEngine.Random.value)) * lastCloneSpread;
                 newGo.transform.SetParent(group);
             }
@@ -627,8 +748,8 @@ public class zEditorHelper : EditorWindow
             Transform group = (new GameObject("Group")).transform;
             for (int i = 0; i < 10; i++)
             {
-                GameObject newGo = Instantiate(Selection.activeGameObject);
-                newGo.transform.position += Selection.activeGameObject.transform.position + UnityEngine.Random.onUnitSphere * lastCloneSpread;
+                GameObject newGo = Instantiate(selObj);
+                newGo.transform.position += selObj.transform.position + UnityEngine.Random.onUnitSphere * lastCloneSpread;
                 newGo.transform.SetParent(group);
             }
         }
@@ -651,15 +772,15 @@ public class zEditorHelper : EditorWindow
 
     void collapseComponents(bool collapse)
     {
-        Component[] components = Selection.activeGameObject.GetComponents<Component>();
+        Component[] components = selObj.GetComponents<Component>();
         for (int i = 0; i < components.Length; i++)
         {
             UnityEditorInternal.InternalEditorUtility.SetIsInspectorExpanded(components[i], !collapse);
         }
 
-        GameObject g = Selection.activeGameObject;
-        Selection.activeGameObject = null;
-        EditorApplication.delayCall += () => Selection.activeGameObject = g;
+        GameObject g = selObj;
+        selObj = null;
+        EditorApplication.delayCall += () => selObj = g;
     }
     string stripUnity(string s)
     {
