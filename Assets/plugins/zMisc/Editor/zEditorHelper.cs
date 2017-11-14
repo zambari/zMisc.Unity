@@ -8,7 +8,7 @@ using System.IO;
 using UnityEngine.EventSystems;
 
 /// Zambari 2017
-/// v.1.05
+/// v.1.06
 /// 
 
 public class zEditorHelper : EditorWindow
@@ -16,6 +16,7 @@ public class zEditorHelper : EditorWindow
     [MenuItem("Tools/Open zEditorHelper")]
     static void Init()
     {
+
         zEditorHelper window =
             (zEditorHelper)EditorWindow.GetWindow(typeof(zEditorHelper));
         rebuldTools();
@@ -35,12 +36,15 @@ public class zEditorHelper : EditorWindow
     bool showParentLayout;
     float lastCloneSpread;
     static int _screenNr;
+    static System.Diagnostics.Stopwatch stopwatch;
 
     bool applyToChildren;
     string lastStatus;
 
     bool objectCacheValid;
+    bool showTextsInLayout;
     List<Component> listOfComponents;
+
     public static string[] tags = { "None", "Layer0", "Layer1", "Layer2", "Layer3" };
     static int screenNr
     {
@@ -60,16 +64,16 @@ public class zEditorHelper : EditorWindow
         set { Selection.activeGameObject = value; ; }
     }
     #endregion defines
-  
+
     #region unity
     void OnEnable()
     {
         screenNr = PlayerPrefs.GetInt("zEditorTool_lastTool", 0);
-        SceneView.onSceneGUIDelegate += this.OnSceneGUI;
+      //  SceneView.onSceneGUIDelegate += this.OnSceneGUI;
     }
     void OnDisable()
     {
-        SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
+     //   SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
     }
 
 
@@ -80,6 +84,7 @@ public class zEditorHelper : EditorWindow
             scaleSliderVal = selObj.transform.localScale.x;
         Repaint();
     }
+    /*
     void OnSceneGUI(SceneView sceneView)
     {
         if (activeTool != "Layout") return;
@@ -91,7 +96,7 @@ public class zEditorHelper : EditorWindow
             float valueDivide = 200;
             if (layoutElement.GetComponentInParent<HorizontalLayoutGroup>() != null && layoutElement.preferredWidth > 0)
             {
-                float newVal = Handles.ScaleSlider(layoutElement.preferredWidth, layoutElement.transform.position/*& (corners[2] + corners[3]) / 2*/, Vector3.right, Quaternion.identity, 50 + layoutElement.preferredWidth / 3, 0);
+                float newVal = Handles.ScaleSlider(layoutElement.preferredWidth, layoutElement.transform.position/*& (corners[2] + corners[3])  , Vector3.right, Quaternion.identity, 50 + layoutElement.preferredWidth / 3, 0);
                 float delta = newVal - layoutElement.preferredWidth;
                 if (delta != 0) delta /= valueDivide;
                 if (delta > 0 || layoutElement.preferredWidth > 10)
@@ -113,8 +118,11 @@ public class zEditorHelper : EditorWindow
 
         }
     }
-    void OnGUI()
+ */
+     void OnGUI()
     {
+        stopwatch = new System.Diagnostics.Stopwatch();
+        stopwatch.Start();
         if (toolsHidden == null) rebuldTools();
         GUILayout.Space(6);
         thisStyle = EditorStyles.miniButton;
@@ -135,6 +143,8 @@ public class zEditorHelper : EditorWindow
         if (activeTool == "Components") drawComponents();
         if (activeTool == "Config") drawConfig();
         if (activeTool == "Layout") drawLayout();
+        GUILayout.FlexibleSpace();
+        GUILayout.Label("Time spent " + stopwatch.ElapsedMilliseconds);
     }
     #endregion unity
     #region tabsAndTools
@@ -190,8 +200,7 @@ public class zEditorHelper : EditorWindow
            GUILayout.EndHorizontal();*/
 
         GUILayout.FlexibleSpace();
-        if (GUILayout.Button("edit helper"))
-            EditHelperCode();
+
 
     }
 
@@ -306,6 +315,15 @@ public class zEditorHelper : EditorWindow
                 if (GUILayout.Button(tags[i])) setTags(tags[i]);
         }
     }
+
+    void drawDefauttTextColor()
+    {
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Default text color");
+        defaultTextColor = EditorGUILayout.ColorField(defaultTextColor);
+        GUILayout.EndHorizontal();
+    }
+
     void drawConfig()
     {
         GUILayout.Space(10);
@@ -318,13 +336,20 @@ public class zEditorHelper : EditorWindow
                 rebuldTools();
             }
         }
+showTextsInLayout=GUILayout.Toggle(showTextsInLayout, "Show Texts in Layout");
+        drawCameraBg();
         GUILayout.Space(10);
         showParentLayout = GUILayout.Toggle(showParentLayout, "Show Parent Auto Layout");
+        drawCameraBg();
+        // defaultFont = EditorGUIUtility.ShowObjectPicker<Font>(defaultFont, false,null,0 );
+        GUILayout.FlexibleSpace();
+        if (GUILayout.Button("edit helper")) EditHelperCode();
+
     }
 
     void drawLayout()
     {
-        drawCameraBg();
+
         if (selObj != null)
         { drawImageColorHelper(); }
         if (Selection.objects.Length > 1)
@@ -345,6 +370,8 @@ public class zEditorHelper : EditorWindow
         if (selObj != null) if (GUILayout.Button("Parent panel")) createParentPanel();
         GUILayout.EndHorizontal();
 
+
+
         if (GUILayout.Button("create Text")) selObj = createText();
 
         if (selObj != null)
@@ -352,9 +379,14 @@ public class zEditorHelper : EditorWindow
             GUILayout.Label("Sub Layout");
             switchLayout(selObj);
         }
-
+        GUILayout.Space(10);
+if (showTextsInLayout) drawTexts();
+        GUILayout.Space(10);
+        if (selObj!=null && selObj.transform.localScale!=Vector3.one)
+        if (GUILayout.Button("Reset Scale (is "+selObj.transform.localScale+")"))
+            performOnComponents<Transform>((Transform t)=>{t.localScale=Vector3.one; });
+    
     }
-
     void drawTransform()
     {
         if (nothingSelected) return;
@@ -472,11 +504,97 @@ public class zEditorHelper : EditorWindow
         GUILayout.EndHorizontal();
     }
 
+    Vector2 scrollPos;
 
+    //enum AnchorNames  {  UpperLeft,UpperCenter,UpperRight,MiddleLeft,MiddleCenter,MiddleRight,LowerLeft,LowerCenter,LowerRight};/
+    //  string[] vertAlign = { "Upper", "Middle", "Lower" };
+    //    string[] horizAlign = { "Upper", "Middle", "Lower" };
+
+    enum VertAlign { Upper, Middle, Lower };
+    enum HorizAlign { Left, Middle, Right };
+    int currentAnchror;
+
+    HorizAlign getHorizIndex(TextAnchor anchor)
+    {
+        if (anchor == TextAnchor.UpperLeft || anchor == TextAnchor.MiddleLeft || anchor == TextAnchor.LowerLeft)
+            return HorizAlign.Left;
+        if (anchor == TextAnchor.UpperCenter || anchor == TextAnchor.MiddleCenter || anchor == TextAnchor.LowerCenter)
+            return HorizAlign.Middle;
+        return HorizAlign.Right;
+    }
+
+    VertAlign getVertIndex(TextAnchor anchor)
+    {
+        if (anchor == TextAnchor.UpperLeft || anchor == TextAnchor.UpperCenter || anchor == TextAnchor.UpperRight)
+            return VertAlign.Upper;
+        if (anchor == TextAnchor.MiddleLeft || anchor == TextAnchor.MiddleCenter || anchor == TextAnchor.MiddleRight)
+            return VertAlign.Middle;
+        return VertAlign.Lower;
+    }
+    void drawTextAnchors()
+    {
+        if (selObj == null) return;
+
+        Text text = selObj.GetComponentInChildren<Text>();
+        if (text == null) return;
+
+        HorizAlign currentHoriz = getHorizIndex(text.alignment);
+        VertAlign currentVert = getVertIndex(text.alignment);
+        GUILayout.BeginHorizontal();
+        HorizAlign newCurrentHoriz = (HorizAlign)GUILayout.Toolbar((int)currentHoriz, Enum.GetNames(typeof(HorizAlign)));
+        VertAlign newCurrentVert = (VertAlign)GUILayout.Toolbar((int)currentVert, Enum.GetNames(typeof(VertAlign)));
+
+        if (newCurrentHoriz != currentHoriz)
+        {
+            performOnComponents<Text>((Text t) => { setTextHorizontal(t, newCurrentHoriz); });
+        } else
+        if (newCurrentVert != currentVert)
+        {
+            performOnComponents<Text>((Text t) => { setTextVertical(t, newCurrentVert); });
+        }
+        GUILayout.EndHorizontal();
+
+    }
+    void setTextHorizontal(Text text, HorizAlign h)
+    {
+        VertAlign vert = getVertIndex(text.alignment);
+        text.alignment = combineAnchors(h, vert);
+    }
+    void setTextVertical(Text text, VertAlign v)
+    {
+        HorizAlign h = getHorizIndex(text.alignment);
+        text.alignment = combineAnchors(h, v);
+    }
+    TextAnchor combineAnchors(HorizAlign h, VertAlign v)
+    {
+        if (h == HorizAlign.Left)
+        {
+            if (v == VertAlign.Upper) return TextAnchor.UpperLeft;
+            if (v == VertAlign.Middle) return TextAnchor.MiddleLeft;
+            if (v == VertAlign.Lower) return TextAnchor.LowerLeft;
+        }
+        if (h == HorizAlign.Middle)
+        {
+            if (v == VertAlign.Upper) return TextAnchor.UpperCenter;
+            if (v == VertAlign.Middle) return TextAnchor.MiddleCenter;
+            if (v == VertAlign.Lower) return TextAnchor.LowerCenter;
+        }
+        if (h == HorizAlign.Right)
+        {
+            if (v == VertAlign.Upper) return TextAnchor.UpperRight;
+            if (v == VertAlign.Middle) return TextAnchor.MiddleRight;
+            if (v == VertAlign.Lower) return TextAnchor.LowerRight;
+        }
+        return TextAnchor.MiddleCenter;
+    }
+
+  
     void drawTexts()
     {
         if (nothingSelected) return;
-        performOnComponents<Text>(textChange, true);
+
+
+        drawTextAnchors();
         GUILayout.BeginHorizontal();
         if (selObj.GetComponentInChildren<Text>() != null)
         {
@@ -485,7 +603,9 @@ public class zEditorHelper : EditorWindow
             if (GUILayout.Button("makeBlack"))
                 performOnComponents<Text>((Text t) => t.color = Color.black, true);
         }
+
         GUILayout.EndHorizontal();
+        performOnComponents<Text>(textChange, true);
     }
 
     void drawImageColorHelper()
@@ -838,26 +958,19 @@ public class zEditorHelper : EditorWindow
                 {
                     T[] myComponents = Selection.gameObjects[i].GetComponentsInChildren<T>();
                     for (int j = 0; j < myComponents.Length; j++)
-                    {
                         if (!listOfComponents.Contains(myComponents[j]))
                             listOfComponents.Add(myComponents[j]);
-
-                    }
                 }
             }
             objectCacheValid = true;
         }
         for (int i = 0; i < listOfComponents.Count; i++)
-        {
-            Undo.RecordObject(listOfComponents[i], "utility");
-            actionToPerform((T)listOfComponents[i]);
-
-        }
-
-
+            if (listOfComponents[i]!=null)
+            {
+                    Undo.RecordObject(listOfComponents[i], "utility");
+                    actionToPerform((T)listOfComponents[i]);
+            }
     }
-
-
 
     #endregion helpers
 }
@@ -873,3 +986,4 @@ public static class PosRot
     }
 }
 #endif
+
