@@ -25,7 +25,7 @@ public class zEditorHelper : EditorWindow
     }
     #region defines
     static string[] tools = { "Components", "Layers", "Transform", "Text", "Misc", "Layout", "Config" };
-    static string[] bgColors = { "SkyBox", "Black", "Bluish", "Random", "White" };
+//    static string[] bgColors = { "SkyBox", "Black", "Bluish", "Random", "White" };
     static string[] activeTools;
     string activeTool;
     static bool[] toolsHidden;

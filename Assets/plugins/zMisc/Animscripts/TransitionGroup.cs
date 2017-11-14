@@ -16,6 +16,7 @@ public bool manualActivation;
 	[Range(0,1)]
     public float activateManual;
 public bool readyForTransition { get { return (!inTransitionInProgress)&&(!outTransitionInProgress);} }
+    public GameObject[] objects;
 
 void OnValidate()
 {
@@ -27,15 +28,16 @@ void OnValidate()
 	  	PickActive(nextNr);
 	}
 }
-IEnumerator run(ITransitionable requester)
+public void RequestActivation(ITransitionable requester)
 {
+	if (Application.isPlaying)
+	{
+
 	if (activeTransition==null)
 	{
 		activeTransition=requester;
 		activeTransitionGameObject=requester.gameObject;
 		activeTransition.fadeInComplete=InTransitionComplete;
-        activeTransition.gameObject.SetActive(true);
-         yield return null;
 		activeTransition.AnimateIn();
 		inTransitionInProgress=true;
 	} else
@@ -47,15 +49,7 @@ IEnumerator run(ITransitionable requester)
 		 nextActive=requester;
 		 nextActiveGameObject=requester.gameObject;
 	}
-    yield return null;
-}
-public void RequestActivation(ITransitionable requester)
-{
-	if (Application.isPlaying)
-	{
-
-
-	StartCoroutine(run(requester));
+	
 	
 
 	} else
@@ -72,7 +66,18 @@ inTransitionInProgress=false;
 nextActive=null;
 activeTransition=src;
 }
-
+IEnumerator getAnimationOut(ITransitionable src)
+{
+    yield return null;
+    src.gameObject.SetActive(true);
+    src.AnimateOut();
+}
+public void RequestAnimateOut(ITransitionable src)
+{
+if (Application.isPlaying) return;
+ StartCoroutine(getAnimationOut(src));
+ Debug.Log("sa");
+}
 void OutTransitionFadeOutComplete(ITransitionable src)
 {
     outTransitionInProgress=false;
@@ -89,19 +94,10 @@ void OutTransitionReadyForNext(ITransitionable src)
         for (int i = 0; i < objects.Length; i++) objects[i] = transform.GetChild(i).gameObject;
         PickActive(0);
     }
-    public GameObject[] objects;
-    void Start()
-    {
- 
-            getObjects();
-    }
-    void Reset()
-    {
-        getObjects();
-    }
+
 	
     public void PickActive(int v)
-    {
+    {if (objects==null) getObjects();
         if (v < 0 || v >= objects.Length) { Debug.Log("invalid selection " + v, gameObject); return; }
         for (int i = 0; i < objects.Length; i++)
 

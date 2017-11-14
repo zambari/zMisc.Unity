@@ -13,25 +13,17 @@ namespace Transitions
 
     [ExecuteInEditMode]
     public class Transition : MonoBehaviour, ITransitionable
-    {
+    { //       GameObject gameObject;
+
+        const bool ADD_CANVAS_FADER = true;
+        [Header("Settings")]
         [Range(0.1f, 3f)]
         public float animationSpeed = 1;//
                                         //  public TransitionElements transitionElements;
-        [ExposeMethodInEditor]
-        void FillTransitionList()
-        {
-            adders = new List<ComponentAdder>();
-            adders.Add(new ComponentAdder(typeof(TransitionApplyCanvasGroup)));
-            adders.Add(new ComponentAdder(typeof(TransitionApplyMoveBetween)));
-            adders.Add(new ComponentAdder(typeof(TransitionApplyDeltaSize)));
-            adders.Add(new ComponentAdder(typeof(TransitionApplyScale)));
-
-        }
 
         public enum AnimStates { inactive, pendingShow, transitionIn, active, transitionOut }
 
-        [Range(0, 1)]
-        public float phase;
+        public float phase { get { return _phase; } set { _phase = value; } }
         public TransitionGroup group;
         public AnimationCurve curve;
         public bool useSmoothStep = true;
@@ -41,9 +33,11 @@ namespace Transitions
             curve = new AnimationCurve();
             curve.AddKey(0, 0);
             curve.AddKey(1, 1);
-            group = GetComponentInParent<TransitionGroup>();
+            GetGroup();
             FillTransitionList();
-            if (group == null) transform.parent.gameObject.AddComponent<TransitionGroup>();
+            if (ADD_CANVAS_FADER) gameObject.AddComponent<TransitionApplyCanvasGroup>();
+
+
         }
         ITransitionElement[] executors;
         public AnimStates _animState;
@@ -56,9 +50,15 @@ namespace Transitions
         public List<ComponentAdder> adders;
         [ReadOnly]
         public float maxDelay;
+        [Header("Value preview")]
+
+        [Range(0, 1)]
+        [SerializeField]
+        float _phase = 1;
         void OnValidate()
         {
             setPhase(phase);
+
             //animState=_animState;
             // if (executors == null) executors = GetComponents<ITransitionElement>();
             // transitionElements.OnValidate(this);
@@ -108,6 +108,7 @@ namespace Transitions
             animState = AnimStates.active;
         }
 
+        [ExposeMethodInEditor]
         public void AnimateIn()
         {
             gameObject.SetActive(true);
@@ -115,42 +116,54 @@ namespace Transitions
             if (phase < 1) animState = AnimStates.transitionIn;
             if (animRoutine == null) animRoutine = StartCoroutine(AnimatorCoroutine());
 
-            Debug.Log(name + " animating in");
+         //   Debug.Log(name + " animating in");
         }
+        [ExposeMethodInEditor]
         public void AnimateOut()
         {
             if (!isActiveAndEnabled) sendFadeOutComplete();
-            nextEvnetTriggered = false;
 
             if (phase > 0) animState = AnimStates.transitionOut;
-
-            if (animRoutine == null) animRoutine = StartCoroutine(AnimatorCoroutine());
-
-            Debug.Log(name + " animating out");
+            if (Application.isPlaying)
+            {
+                if (animRoutine == null) animRoutine = StartCoroutine(AnimatorCoroutine());
+            }
+            else
+            {
+                setPhase(0);
+                gameObject.SetActive(false);
+            }
+         //   Debug.Log(name + " animating out");
+        }
+        void GetGroup()
+        {
+            if (group == null) group = transform.parent.gameObject.GetComponent<TransitionGroup>();
         }
         void OnEnable()
         {
-            if (group == null) group = GetComponentInParent<TransitionGroup>();
+            if (!Application.isPlaying)
+            {//Debug.Log("s");
+                //setPhase(1);
+                return;
+            }
+            GetGroup();
             if (!Application.isPlaying) { if (group != null) group.RequestActivation(this); return; }
             setPhase(0);
-
-            if (!group.readyForTransition) gameObject.SetActive(false);
+            if (group == null) AnimateIn();
             else
             {
-                animState = AnimStates.pendingShow;
-                group.RequestActivation(this);
+                if (!group.readyForTransition) gameObject.SetActive(false);
+                else
+                {
+                    animState = AnimStates.pendingShow;
+                    group.RequestActivation(this);
+                }
             }
-
         }
 
         void OnDisable()
         {
-            if (!Application.isPlaying) return;
-            if (animState != AnimStates.inactive)
-            {
-                //              gameObject.SetActive(true);
-                //                AnimateOut();
-            }
+            if (group != null) group.RequestAnimateOut(this);
 
         }
         void sendFadeInComplete()
@@ -167,6 +180,7 @@ namespace Transitions
         void sendFadeOutComplete()
         {
             phase = 0;
+            nextEvnetTriggered = false;
             animState = AnimStates.inactive;
             if (_fadeOutComplete != null) _fadeOutComplete.Invoke(this);
             _fadeOutComplete = null;
@@ -220,7 +234,17 @@ namespace Transitions
             coroutineRunning = false;
             animRoutine = null;
         }
+
+        void FillTransitionList()
+        {
+            adders = new List<ComponentAdder>();
+            adders.Add(new ComponentAdder(typeof(TransitionApplyCanvasGroup)));
+            adders.Add(new ComponentAdder(typeof(TransitionApplyMoveBetween)));
+            adders.Add(new ComponentAdder(typeof(TransitionApplyDeltaSize)));
+            adders.Add(new ComponentAdder(typeof(TransitionApplyScale)));
+        }
     }
+
 }
 
 namespace Transitions
@@ -228,6 +252,7 @@ namespace Transitions
     [System.Serializable]
     public class ComponentAdder
     {
+        GameObject gameObject;
         public string name;
         Type componentType;
         public ComponentAdder(Type t)
@@ -247,7 +272,8 @@ namespace Transitions
                     Debug.Log("adding");
                     _isPresent = value;
                     __isPresent = value;
-                    Component c = gameObject.AddComponent(componentType);
+                    //Component c =
+                     gameObject.AddComponent(componentType);
                     //  if (c!=null) GameObject.DestroyImmediate(c);
                 }
                 else
@@ -267,7 +293,7 @@ namespace Transitions
 
         }
 
-        GameObject gameObject;
+
         public void OnValidate(GameObject gameObject)
         {
             this.gameObject = gameObject;
@@ -275,4 +301,5 @@ namespace Transitions
         }
 
     }
+
 }

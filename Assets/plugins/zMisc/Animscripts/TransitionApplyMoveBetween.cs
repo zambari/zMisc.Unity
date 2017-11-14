@@ -2,28 +2,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
-public class TransitionApplyMoveBetween :TransitionElementBase {
+[ExecuteInEditMode]
+public class TransitionApplyMoveBetween : TransitionElementBase
+{
 
     public Vector3 startPos;
     public Vector3 endPos;
-	[SerializeField]
-   [HideInInspector]
+    
+    public Vector3 current;
+
+    [SerializeField]
+    [HideInInspector]
     [Range(0, 1)]
     float _pos;
 
-	protected override  void Reset()
-	{
+    protected override void Reset()
+    {
         base.Reset();
-		startPos=transform.localPosition;
-		endPos=transform.localPosition;
-		
-	}
-    protected override  void OnTransitionValue(float f)
-	{
-		pos=f;
-	}
-    protected override void  OnValidate()
+        startPos = targetTransform.localPosition;
+        endPos = targetTransform.localPosition;
+
+    }
+    protected override void OnTransitionValue(float f)
+    {
+        pos = f;
+    }
+    protected override void OnValidate()
     {
         base.OnValidate();
         pos = _pos;
@@ -35,25 +39,30 @@ public class TransitionApplyMoveBetween :TransitionElementBase {
         set
         {
             _pos = value;
-            transform.localPosition = Vector3.Lerp(startPos, endPos, value);
+            targetTransform.localPosition = Vector3.Lerp(startPos, endPos, value);
         }
     }
 
     [ExposeMethodInEditor]
-    public void saveAsStart()
+    public void saveAaZero()
     {
-        startPos = transform.localPosition;
+        startPos = targetTransform.localPosition;
+        pos=0;
     }
 
     [ExposeMethodInEditor]
-    public void saveAsEnd()
+    public void saveAsOne()
     {
-        endPos = transform.localPosition;
+        endPos = targetTransform.localPosition;
+        pos=1;
 
+    }
+    void Update()
+    {
+        current = targetTransform.localPosition;
     }
 
 
-	
-	
-	
+
+
 }
