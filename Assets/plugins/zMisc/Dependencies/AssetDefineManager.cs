@@ -30,10 +30,13 @@ public class AssetDefineManager : AssetPostprocessor
 			new AssetDefine("zOSC.cs",destkop , "zOSC"),
 			new AssetDefine("PlayerPrefsX.cs",destkop , "PlayerPrefsX"),
 			new AssetDefine("MidiMaster.cs",destkop , "MIDI"),
-	   	new AssetDefine("zKeyMap.cs",destkop , "zKeyMap"),
-		   new AssetDefine("zKeyMap.cs",destkop , "zKeyMap"),
+	   		new AssetDefine("zKeyMap.cs",destkop , "zKeyMap"),
+		   new AssetDefine("ExposeMethodInEditorAttribute.cs",destkop , "ExposeMethod"),
 		   new AssetDefine("EventsWithParameters.cs",destkop , "paramEvents"),
 		   new AssetDefine("VideoControllerBasic.cs",destkop , "zVideo"),
+		   new AssetDefine("zExtensions.cs",destkop , "zExtensions"),
+
+		   	   new AssetDefine("EditorCoroutine.cs",destkop , "EditorCoroutine"),
 		   
 	};
  

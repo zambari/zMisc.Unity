@@ -207,7 +207,11 @@ public static class zExtensions
     /// prints a list of keyframes, in a formsuitable for copy and pasting back to the code to recreate
     /// add a name for it to be present in the output
     /// </summary>
-    public static void listKeyFramesAsCode(this AnimationCurve a, string name = null)
+    public static void dumpKeys(this AnimationCurve a, string name = null)
+    {
+         a.listKeyFramesAsCode( name );
+    }
+        public static void listKeyFramesAsCode(this AnimationCurve a, string name = null)
     {
         int i = 0;
         string s = "Listing AnimationCurve keyframes\nClick to see full output (multiline) " + (name == null ? " (you can add name too !)" : "") + "  \n\n";

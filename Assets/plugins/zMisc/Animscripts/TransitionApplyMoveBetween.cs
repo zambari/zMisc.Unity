@@ -3,26 +3,29 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AnimExecuteMoveBetween : MonoBehaviour , IExecuteAnimation {
+public class TransitionApplyMoveBetween :TransitionElementBase {
 
     public Vector3 startPos;
     public Vector3 endPos;
 	[SerializeField]
+   [HideInInspector]
     [Range(0, 1)]
     float _pos;
 
-	void Reset()
+	protected override  void Reset()
 	{
+        base.Reset();
 		startPos=transform.localPosition;
 		endPos=transform.localPosition;
 		
 	}
-	public void OnAnimationPhaseChange(float f)
+    protected override  void OnTransitionValue(float f)
 	{
 		pos=f;
 	}
-    void OnValidate()
+    protected override void  OnValidate()
     {
+        base.OnValidate();
         pos = _pos;
     }
 

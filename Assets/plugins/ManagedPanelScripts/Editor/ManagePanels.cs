@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
-using Swing.Editor;
+#if  EditorCoroutine  
+//using Swing.Editor;
+#endif
 namespace zUI
 {
 
@@ -41,7 +43,7 @@ namespace zUI
         Image flashImage;
         Color flashColor = Color.red * 0.3f;
         float lastSpacing;
-        bool coroutineRunning;
+//        bool coroutineRunning;
         bool restartCoroutine;
         bool stopCoroutine;
                GameObject createTempObject()
@@ -68,7 +70,7 @@ namespace zUI
         
         IEnumerator selectionFlashRoutine(GameObject target)
         {
-            coroutineRunning=true;
+          //  coroutineRunning=true;
             stopCoroutine=false;
             if (flashImage == null) createTempObject();
             int numSteps = 20;
@@ -131,7 +133,7 @@ yield return null;
 
             tempObject.SetActive(false);
             
-            coroutineRunning=false;
+          //  coroutineRunning=false;
             yield return null;
 
         }
@@ -148,7 +150,9 @@ stopCoroutine=true;
                 LayoutHelper layoutHelper = Selection.activeGameObject.GetComponent<LayoutHelper>();
                 if (layoutHelper != null)
                 {
-                    EditorCoroutine.start(selectionFlashRoutine((Selection.activeGameObject)));
+#if  EditorCoroutine                    
+ //                  EditorCoroutine.start(selectionFlashRoutine((Selection.activeGameObject)));
+#endif                    
 
                     layoutHelper.IsEdited(true);
                     lastSelected = layoutHelper;
@@ -395,7 +399,7 @@ stopCoroutine=true;
             int targetIndex = target.transform.GetSiblingIndex();
 
             GameObject go = new GameObject("Panel_" + nextPanelIndex);
-
+             Undo.RegisterCreatedObjectUndo(go,"panel");
             nextPanelIndex++;
             RectTransform rectTransform = go.AddComponent<RectTransform>();
             rectTransform.sizeDelta = Vector2.one * 300 + Vector2.zero.Randomize(200);
@@ -512,7 +516,8 @@ stopCoroutine=true;
             }
             if (GUILayout.Button("5x Sub Panel")) //, GUIStyle.none
             {
-                Undo.CreateSnapshot();
+                    
+                
                 for (int i = 0; i < 5; i++)
                 {
                     CreatePanel(selectedObject, true);

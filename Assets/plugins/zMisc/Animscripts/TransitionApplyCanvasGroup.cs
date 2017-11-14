@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 [RequireComponent(typeof(CanvasGroup))]
-public class AnimExecuteCanvasGroup : MonoBehaviour, IExecuteAnimation {
+public class TransitionApplyCanvasGroup : TransitionElementBase {
 
 	CanvasGroup canvasGroup;
 	public float minValue=0;
 
-	public void OnAnimationPhaseChange(float f)
+protected override  void OnTransitionValue(float f)
 	{
 		if (canvasGroup==null ) canvasGroup=GetComponent<CanvasGroup>();
 		canvasGroup.alpha=f*(1-minValue)+minValue;

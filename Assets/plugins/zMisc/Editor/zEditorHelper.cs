@@ -19,6 +19,7 @@ public class zEditorHelper : EditorWindow
 
         zEditorHelper window =
             (zEditorHelper)EditorWindow.GetWindow(typeof(zEditorHelper));
+        window.name=window.name; //avoid warning
         rebuldTools();
 
     }

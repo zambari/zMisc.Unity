@@ -7,8 +7,8 @@ public class TransitionGroup : MonoBehaviour {
 
 public GameObject activeTransitionGameObject;
 public  GameObject nextActiveGameObject;
-public ITransition activeTransition;
-public  ITransition nextActive;
+public ITransitionable activeTransition;
+public  ITransitionable nextActive;
 public bool inTransitionInProgress;
 public bool outTransitionInProgress;
 [Header("debug")]
@@ -27,16 +27,15 @@ void OnValidate()
 	  	PickActive(nextNr);
 	}
 }
-public void RequestActivation(ITransition requester)
+IEnumerator run(ITransitionable requester)
 {
-	if (Application.isPlaying)
-	{
-
 	if (activeTransition==null)
 	{
 		activeTransition=requester;
 		activeTransitionGameObject=requester.gameObject;
 		activeTransition.fadeInComplete=InTransitionComplete;
+        activeTransition.gameObject.SetActive(true);
+         yield return null;
 		activeTransition.AnimateIn();
 		inTransitionInProgress=true;
 	} else
@@ -48,7 +47,15 @@ public void RequestActivation(ITransition requester)
 		 nextActive=requester;
 		 nextActiveGameObject=requester.gameObject;
 	}
-	
+    yield return null;
+}
+public void RequestActivation(ITransitionable requester)
+{
+	if (Application.isPlaying)
+	{
+
+
+	StartCoroutine(run(requester));
 	
 
 	} else
@@ -59,19 +66,19 @@ public void RequestActivation(ITransition requester)
 	}
 
 }
-void InTransitionComplete(ITransition src)
+void InTransitionComplete(ITransitionable src)
 {
 inTransitionInProgress=false;
 nextActive=null;
 activeTransition=src;
 }
 
-void OutTransitionFadeOutComplete(ITransition src)
+void OutTransitionFadeOutComplete(ITransitionable src)
 {
     outTransitionInProgress=false;
 	if (activeTransition==src) activeTransition=null;
 }
-void OutTransitionReadyForNext(ITransition src)
+void OutTransitionReadyForNext(ITransitionable src)
 {
 	nextActive.AnimateIn();
 	nextActive.fadeInComplete=InTransitionComplete;
@@ -107,7 +114,7 @@ void OutTransitionReadyForNext(ITransition src)
 						activeTransition.readyForNext=OutTransitionReadyForNext;
 						activeTransition.AnimateOut();
 					}
-				ITransition nextTransition=objects[i].GetComponent<ITransition>();
+				ITransitionable nextTransition=objects[i].GetComponent<ITransitionable>();
 				if (nextTransition!=null)
 				{
 		
@@ -133,7 +140,7 @@ void OutTransitionReadyForNext(ITransition src)
                 {
                     if (objects[i].activeSelf)
                     {
-                        ITransition animator = objects[i].GetComponent<ITransition>();
+                        ITransitionable animator = objects[i].GetComponent<ITransitionable>();
 
                         if (animator != null)
                         {

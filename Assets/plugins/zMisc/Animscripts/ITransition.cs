@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public interface ITransition
+public interface ITransitionable
 {
 
-    Action<ITransition> fadeInComplete { set; }
-    Action<ITransition> fadeOutComplete { set; }
-    Action<ITransition> readyForNext { set; }
+    Action<ITransitionable> fadeInComplete { set; }
+    Action<ITransitionable> fadeOutComplete { set; }
+    Action<ITransitionable> readyForNext { set; }
 
     string name { get; }
     GameObject gameObject { get; }
@@ -18,7 +18,8 @@ public interface ITransition
     void AnimateOut();
 
 }
-public interface IExecuteAnimation
+public interface ITransitionElement
 {
     void OnAnimationPhaseChange(float f);
+    float delay {get;}
 }

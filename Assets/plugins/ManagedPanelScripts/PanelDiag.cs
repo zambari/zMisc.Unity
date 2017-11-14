@@ -78,7 +78,7 @@ public class PanelDiag
     {
         //here we go, you can make stuff up
         numberOfRectTransforms = source.gameObject.GetComponentsInChildren<RectTransform>().Length;
-        GameObject[] goList = source.gameObject.GetChildrenGameObjects();
+//        GameObject[] goList = source.gameObject.GetChildrenGameObjects();
 
 
     }

@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 namespace zUI
@@ -12,8 +11,8 @@ public class PanelSeparatorBeta : MonoBehaviour {
 public Image showWhenOn;
 GameObject myControlledObject;
 Transform myControlledTransform;
-RectTransform myRect;
-RectTransform controlledRect;
+//RectTransform myRect;
+//RectTransform controlledRect;
 
 
 	public enum DeactivationMethods { setActive, canvas, layoutelement };
@@ -57,8 +56,8 @@ void afix()
 	myControlledTransform= transform.parent.GetChild(_myCachedIndex+1);
 	myControlledObject=myControlledTransform.gameObject;
 	if (myControlledObject!=null){
-	myRect=GetComponent<RectTransform>();
- 	controlledRect=myControlledObject.GetComponent<RectTransform>();
+//	myRect=GetComponent<RectTransform>();
+ 	//controlledRect=myControlledObject.GetComponent<RectTransform>();
 	 name="------"+myControlledObject.name;
 	}
 }

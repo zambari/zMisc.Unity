@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AnimExecuteDeltaSize : MonoBehaviour, IExecuteAnimation
+public class TransitionApplyDeltaSize :TransitionElementBase
 {
 
     public Vector2 startSize;
@@ -25,7 +25,7 @@ public class AnimExecuteDeltaSize : MonoBehaviour, IExecuteAnimation
 
     void Reset()
     {
-        rect = GetComponent<RectTransform>();
+        rect =targetTransform.gameObject.GetComponent<RectTransform>();
         startSize = rect.sizeDelta;
         endSize = rect.sizeDelta;
         if (useAnchoredPosition)
@@ -41,15 +41,17 @@ public class AnimExecuteDeltaSize : MonoBehaviour, IExecuteAnimation
 		startRot=rect.eulerAngles;
 		endRot=rect.eulerAngles;
     }
-    public void OnAnimationPhaseChange(float f)
+protected override  void OnTransitionValue(float f)
     {
         if (rect == null) rect = GetComponent<RectTransform>();
         pos = f;
 
     }
-    void OnValidate()
-    {	if (usePosition&&useAnchoredPosition) useAnchoredPosition=false;
+    protected override void OnValidate()
+    {	base.OnValidate();
+        if (usePosition&&useAnchoredPosition) useAnchoredPosition=false;
         pos = _pos;
+
     }
 
     public float pos
