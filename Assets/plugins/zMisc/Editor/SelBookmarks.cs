@@ -13,72 +13,24 @@ using UnityEditor;
  Editor window enabling you to remember and restore Hierarchy selections.
  Aslo searches for simiarily named objects within hierarchy (for example objects called Text).
  Theres also a shortcut for toggling the active state of bookmarked objects
- version 1.03    (2017.10.30) removed 'b'  shortcut
  version 1.02  mutliple selections for active toggle now working   (2017.10.11)
  version 1.01    (2017.09.04)
- 
 
 */
 
 
-public static class ObjectEnableToggle
-{
-  /*  [MenuItem("Tools/Actions/Boomark  _b")]
-    static void BookmarkSelected()
-    {
-        for (int i = 0; i < Selection.gameObjects.Length; i++)
-        {
-            GameObject thisGameObject = Selection.gameObjects[i];
-            SelBookmarks.AddBookmark(Selection.activeGameObject);
-        }
-
-    }*/
-
-    [MenuItem("Tools/Actions/Toggle Enabled  _`")]
-    static void toggleEnabled()
-    {
-        if (Selection.activeGameObject != null)
-        {
-            bool newActiveStatus = !Selection.activeGameObject.activeSelf;
-            for (int i = 0; i < Selection.gameObjects.Length; i++)
-                toggleActiveStatus(Selection.gameObjects[i], newActiveStatus);
-        }
-    }
-
-    static void toggleActiveStatus(GameObject o, bool status)
-    {
-        o.SetActive(status);
-        if (o.activeSelf
-         && !o.activeInHierarchy)
-        {
-            Transform thisTransform = o.transform.parent;
-            while (thisTransform != null)
-            {
-                if (thisTransform.gameObject.activeInHierarchy == false)
-                    thisTransform.gameObject.SetActive(true);
-
-                thisTransform = thisTransform.parent;
-            }
-        }
-
-
-    }
-
-}
-
-
 public class SelBookmarks : EditorWindow
-{ static SelBookmarks window ;
+{
     [MenuItem("Tools/Open Selection Bookmarks")]
     static void Init()
     {
 #pragma warning disable 219
-         window =
+        SelBookmarks window =
             (SelBookmarks)EditorWindow.GetWindow(typeof(SelBookmarks));
 #pragma warning restore 219
     }
     [SerializeField]
-    static List<GameObject> bookmarkedObjects;
+    List<GameObject> bookmarkedObjects;
     GameObject[] namedTheSameLOnLevel0;
     GameObject[] namedTheSameLOnLevel1;
     GameObject[] namedTheSameLOnLevel2;
@@ -86,27 +38,6 @@ public class SelBookmarks : EditorWindow
     object[] lastSelectionState;
     bool sorted;
     bool soloMode;
-    public static void AddBookmark(GameObject bookmark)
-    {
-        if (bookmarkedObjects == null) bookmarkedObjects = new List<GameObject>();
-        if (!bookmarkedObjects.Contains(bookmark))
-        {
-            bookmarkedObjects.Add(bookmark);
-        }
-        else
-        {
-            bookmarkedObjects.Remove(bookmark);
-            bookmarkedObjects.Insert(0, bookmark);
-        }
-        if (window!=null)
-            window.Repaint();
-    }
-
-
-    public static void removeBookmark(GameObject bookmark)
-    {
-
-    }
     void OnGUI()
     {
         if (bookmarkedObjects == null) bookmarkedObjects = new List<GameObject>();
@@ -133,7 +64,13 @@ public class SelBookmarks : EditorWindow
                 for (int i = 0; i < Selection.gameObjects.Length; i++)
                 {
                     var thisGameObject = Selection.gameObjects[i];
-                    AddBookmark(thisGameObject);
+                    if (!bookmarkedObjects.Contains(thisGameObject))
+                        bookmarkedObjects.Add(thisGameObject);
+                    else
+                    {
+                        bookmarkedObjects.Remove(thisGameObject);
+                        bookmarkedObjects.Insert(0, thisGameObject);
+                    }
                 }
             }
         if (bookmarkedObjects.Count > 1 && !sorted)

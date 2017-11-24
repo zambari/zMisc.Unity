@@ -230,10 +230,10 @@ public static class zExtensions
         {
             Debug.Log("invalid float (NAN), dividing by zero? !");
             return false;
-
         }
         return true;
     }
+
     public static void saveJson(this object obj, string path)
     {
         string dataAsJson = JsonUtility.ToJson(obj);
@@ -241,7 +241,14 @@ public static class zExtensions
         Debug.Log("saving as " + path);
     }
 
-
+    public static T FromJson<T>(this T obj, string path) // different naming conventino
+    {
+            return obj.loadJson<T>(path);
+    }
+    public static void ToJson(this object obj, string path) // different naming conventino
+    {
+        obj.saveJson( path);
+    }
     public static T loadJson<T>(this T obj, string path)
     {
 

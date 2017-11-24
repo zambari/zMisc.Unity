@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class NameHelper
 {
     MonoBehaviour mono;
-    const char seperator = '\uFEFF'; // unicode whitespace
+  static   char seperator = '\uFEFF'; // unicode whitespace
     const string extraSpace = "  ";
   //  bool useCached;
     string baseName;
@@ -93,6 +93,12 @@ void setDecorators(string a, string b)
     {
         get { RemoveTag(); return null; }
         set { RemoveTag(); }
+    }
+    public static string GetWithoutTags(string s)
+    {
+           string[] split = s.Split(seperator);
+                if (split.Length < 2) return s;
+                return split[1];
     }
 
     public string unMangled
