@@ -10,6 +10,11 @@ public UnityEvent targetEvent;
 public float delay =2;
 public bool runOnStart;
 
+public void setDelay(float f)
+
+{
+	delay=0;
+}
 
 void Start()
 {

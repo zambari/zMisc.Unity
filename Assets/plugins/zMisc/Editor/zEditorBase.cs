@@ -188,7 +188,7 @@ public class zEditorBase : EditorWindow
     protected bool GetOption(string s)
     {
         bool result = true;
-        
+        CheckLists();
         options.TryGetValue(s, out result);
         return result;
 
@@ -536,15 +536,29 @@ protected void FlexibleSpace()
     }
 
 
-    protected void TextChange(Text t)
+    protected void TextObjectNameChange(Text t)
     {
         string currentText = t.text;
         string newText = GUILayout.TextArea(currentText);
-        if (currentText == newText) return;
-        t.text = newText;
-       // if (GetOption("SetTextObjectName"))
-        t.name = "<Text :"+t.text+">";
-        EditorGUIUtility.PingObject(t);
+        
+        if (currentText != newText)
+        {  EditorGUIUtility.PingObject(t);
+
+        t.text = newText; 
+
+        }
+        if (GetOption("SetTextObjectName"))
+
+        {
+            string[] afterSplit=t.text.Split('\n');
+            if (afterSplit.Length>1) t.name = "<Text: multitline>";
+            else 
+            t.name = "<Text: \""+afterSplit[0]+(afterSplit.Length>1?"\n":"")+"\">";
+        t.raycastTarget=false;
+        }
+    
+   
+      
     }
 
     protected GameObject createText()

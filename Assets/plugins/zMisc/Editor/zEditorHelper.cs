@@ -495,7 +495,7 @@ public class zEditorHelper : zEditorTemplate
     void DisplayTexts()
     {
         if (nothingSelected) return;
-
+        
 
         DisplayTextAnchors();
         BH();
@@ -508,7 +508,8 @@ public class zEditorHelper : zEditorTemplate
         }
 
         EH();
-        PerformOnComponents<Text>(TextChange, true);
+        
+        PerformOnComponents<Text>(TextObjectNameChange, true);
     }
     Color DisplayColorPicker(Color c)
     {
