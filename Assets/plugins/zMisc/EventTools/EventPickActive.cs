@@ -3,25 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public interface IAnimmateInOut
-{
-    void animateIn();
-    void animateOut();
-    bool isHidden();
-}
 public class EventPickActive : MonoBehaviour
 {
     [Header("will enable one based on index")]
     public GameObject[] objects;
-    public bool getChildren;
+    public bool getChildrenAndAcitvateFirstOnStart;
+    [SerializeField]
+    int _selected;
     void OnValidate()
     {
-        if (getChildren)
+        if (getChildrenAndAcitvateFirstOnStart)
         {
             //getChildren=false;
             getObjects();
         }
+        PickActive(_selected);
     }
+    [ExposeMethodInEditor]
     void getObjects()
     {
         objects = new GameObject[transform.childCount];
@@ -31,7 +29,7 @@ public class EventPickActive : MonoBehaviour
 
     void Start()
     {
-        if (getChildren)
+        if (getChildrenAndAcitvateFirstOnStart)
             getObjects();
     }
     void Reset()
@@ -42,41 +40,17 @@ public class EventPickActive : MonoBehaviour
     public void PickActive(int v)
     {
         if (v < 0 || v >= objects.Length) { Debug.Log("invalid selection " + v, gameObject); return; }
+        _selected = v;
         for (int i = 0; i < objects.Length; i++)
+            if (objects[i] != null) objects[i].SetActive(i == v);
 
-            if (objects[i] != null)
-            {
-                if (i == v)
-                {
-                    objects[i].SetActive(true);
-                    IAnimmateInOut animator = objects[i].GetComponent<IAnimmateInOut>();
-                    if (animator != null)
-                        animator.animateIn();
-                }
-                else
-                {
-                    if (objects[i].activeSelf)
-                    {
-                        IAnimmateInOut animator = objects[i].GetComponent<IAnimmateInOut>();
-
-                        if (animator != null)
-                        {
-                            if (!animator.isHidden())
-                                    animator.animateOut();
-
-                        }
-                        else objects[i].SetActive(false);
-                    }
-                }
-                }
+       //  Debug.Log("Activating object id: "+v,objects[v]);
     }
 
     public void PickActiveFloat(float v)
     {
         PickActive(Mathf.RoundToInt(v));
     }
-
-
 
 
 }

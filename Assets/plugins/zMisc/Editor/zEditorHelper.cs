@@ -8,24 +8,24 @@ using System.IO;
 using UnityEngine.EventSystems;
 
 /// Zambari 2017
-/// v.1.06
+/// v.1.07 scale is now squared, moved to window 
 /// 
 
 public class zEditorHelper : zEditorTemplate
 {
-    [MenuItem("Tools/Open zEditorHelper")]
+    [MenuItem("Window/Open zEditorHelper")]
     static void Init()
     {
         BaseInit(typeof(zEditorHelper));
     }
     protected override void AddTabs()
     {
-        AddTab("Comps");
-       // AddTab("Layers");
-        AddTab("Transform");
-        AddTab("Text");
-        AddTab("Misc");
-        AddTab("Layout");
+        AddTab("CMP");
+       // AddTab("LRS");
+        AddTab("TRA");
+        AddTab("TXT");
+        AddTab("MSC");
+        AddTab("LAY");
     }
     protected override void AddOptions()
     {
@@ -34,12 +34,12 @@ public class zEditorHelper : zEditorTemplate
     }
     protected override void DisplayTab(string toolName)
     {
-        if (toolName == "Layers") DisplayTagger();
-        if (toolName == "Transform") DisplayTransform();
-        if (toolName == "Misc") DisplayMisc();
-        if (toolName == "Text") DisplayTexts();
-        if (toolName == "Comps") displayComponents();
-        if (toolName == "Layout") DisplayLayout();
+        if (toolName == "LRS") DisplayTagger();
+        if (toolName == "TRA") DisplayTransform();
+        if (toolName == "MSC") DisplayMisc();
+        if (toolName == "TXT") DisplayTexts();
+        if (toolName == "CMP") displayComponents();
+        if (toolName == "LAY") DisplayLayout();
     }
     #region defines
     static string[] bgColors = { "SkyBox", "Black", "Bluish", "Random", "White" };
@@ -312,8 +312,18 @@ public class zEditorHelper : zEditorTemplate
         EH();
         Vector3 currentScale = selObj.transform.localScale;
         if (currentScale.x == currentScale.y && currentScale.y == currentScale.z)
-            scaleSliderVal = GUILayout.HorizontalSlider(currentScale.x, 0.001f, 2);
-        if (scaleSliderVal != currentScale.x) selObj.transform.localScale = new Vector3(scaleSliderVal, scaleSliderVal, scaleSliderVal);
+            scaleSliderVal = GUILayout.HorizontalSlider(Mathf.Sqrt(currentScale.x), 0.01f, 3);
+        if (scaleSliderVal != currentScale.x) 
+        { float f=scaleSliderVal*scaleSliderVal;
+            Vector3 newScale=new Vector3(f, f, f);
+            for (int i=0;i<Selection.gameObjects.Length;i++)
+            {
+                Undo.RecordObject(Selection.gameObjects[i],"scale change");
+                Selection.gameObjects[i].transform.localScale=newScale;
+            }
+            
+             //selObj.transform.localScale = new Vector3(scaleSliderVal, scaleSliderVal, scaleSliderVal);
+        }
         DisplayflipAxis();
     }
 

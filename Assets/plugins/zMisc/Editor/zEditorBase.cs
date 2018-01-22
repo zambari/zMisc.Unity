@@ -9,6 +9,7 @@ using System.Linq;
 
 public class zEditorBase : EditorWindow
 {
+    //line 512 gameObject.transform.SetAsFirstSibling();    
 
     protected virtual void DisplayTab(string toolName)
     {
@@ -86,12 +87,12 @@ public class zEditorBase : EditorWindow
     {
         GUILayout.Space(6);
         if (availableTools == null) GetAvailableTools();
-        if (availableTools.Length == 0) selectedTab = 0;
+        if (availableTools.Length == 0) return;
         else
         if (selectedTab >= availableTools.Length) selectedTab = availableTools.Length - 1;
 
         selectedTab = GUILayout.Toolbar(selectedTab, availableTools);
-        if (availableTools[selectedTab] == "Config") DisplayConfig();
+        if (availableTools[selectedTab] == "CFG") DisplayConfig();
         else
             DisplayTab(availableTools[selectedTab]);
         DisplayFooter();
@@ -401,16 +402,17 @@ protected void FlexibleSpace()
     {
         int lastCount = 0;
         if (availableTools != null) lastCount = availableTools.Length - 1;
-        if (allTabs == null)
+         CheckLists();
+      /*  if (allTabs == null)
         {
             AddTab("no tools added");
-        }
+        }*/
         List<string> activeTabs = new List<string>();
         for (int i = 0; i < allTabs.Count; i++)
         {
             if (toolEnabledFlag[i] && ShouldTabBeVisible(allTabs[i])) activeTabs.Add(allTabs[i]);
         }
-        if (showConfig) activeTabs.Add("Config");
+        if (showConfig) activeTabs.Add("CFG");
         availableTools = activeTabs.ToArray();
         int thisCount = availableTools.Length - 1;
         if (thisCount > lastCount) selectedTab++;
@@ -508,6 +510,8 @@ protected void FlexibleSpace()
     protected GameObject CreatePanel(bool filling = false)
     {
         GameObject gameObject = CreateChild("Panel", GetUIParent()).gameObject;
+        gameObject.transform.SetAsFirstSibling();
+        
         Image i = gameObject.AddComponent<Image>();
         i.color = GetNewPanelColor();
         if (filling)

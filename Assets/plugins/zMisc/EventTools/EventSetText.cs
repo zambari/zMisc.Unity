@@ -4,9 +4,6 @@ using UnityEngine.UI;
 
 public class EventSetText : MonoRect
 {
-public float mulitiplier=100;
-public string unit=" %";
-
     public void setText(string s)
     {
         text.text = s;
@@ -17,7 +14,7 @@ public string unit=" %";
     }
     public void setFloat(float s)
     {
-        text.text = (s*mulitiplier).ToShortString()+unit;
+        text.text = s.ToShortString();
     }
     public void setFloatAsTime(float s)
     {

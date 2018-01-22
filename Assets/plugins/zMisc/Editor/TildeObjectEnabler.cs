@@ -42,8 +42,6 @@ public static class ObjectEnableToggle
                 thisTransform = thisTransform.parent;
             }
         }
-
-
     }
 
 }

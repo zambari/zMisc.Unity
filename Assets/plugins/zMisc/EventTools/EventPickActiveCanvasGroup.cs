@@ -10,7 +10,7 @@ public class EventPickActiveCanvasGroup : MonoBehaviour {
 	public IntEvent forwardEvent;
 
 
-	bool isTransition;
+	bool isPageTransition;
 	public CanvasFader currentActive;
 	public CanvasFader nextActive;
 
@@ -103,7 +103,7 @@ void fadeOutComplete(int index)
 		if (nextActive!=null) { 
 			nextActive.fadeIn();
 		currentActive=nextActive;
-	//	Debug.Log("transitioning to next");
+	//	Debug.Log("PageTransitioning to next");
 		} 
 //		else Debug.Log("fade out something");
 }

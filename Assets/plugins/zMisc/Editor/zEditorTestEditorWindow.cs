@@ -2,7 +2,7 @@
 using UnityEditor;
 //using Unity
 /// Zambari 2017
-
+/*
 
 public class zEditorTestEditorWindow : zEditorTemplate
 {    
@@ -53,3 +53,4 @@ public class zEditorTestEditorWindow : zEditorTemplate
 
 
 }
+ */
