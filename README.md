@@ -1,4 +1,7 @@
-# zMisc.Unity 
+## zMisc.Unity 
+UPDATE: Best used scripts from thsi collection have been forked to zCore https://github.com/zambari/zCore.Unity 
+This repo remains a 'misc' collection but may be cluttered with code most people won't eved need
+
 ### (miscellaneous script collection and their decrtiptions)
 This repository is a random collection of snippets I use for various projects. This repository is mainly hosting the document you are reading right now, in case some one ever finds a file of unknown purpose and tracks is back here - where descriptions of each script are provided.
 Note that it won't necesarily be the source of the lastest version of each script (they tend to get updated as need arises in anotether parts of the zUtils codebase
